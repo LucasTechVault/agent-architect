@@ -1,33 +1,40 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  ArrowDownToLine,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
+import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   BookOpen,
   Box,
-  Check,
   CheckCheck,
-  ChevronDown,
   ChevronRight,
-  CircleHelp,
+  Code2,
   Compass,
   Download,
   GitBranch,
   Hammer,
-  Layers3,
   LayoutGrid,
-  Map,
+  ListChecks,
   Menu,
   Network,
   Radio,
   Search,
   ShieldCheck,
-  Sparkles,
   Upload,
   X,
 } from "lucide-react";
 import { archetypes, type Archetype } from "./data/archetypes";
+import { engineeringSpecs } from "./data/engineering-specs";
+import { roadmapIssues, roadmapPhases } from "./data/roadmap";
+import EngineeringSheet from "./components/EngineeringSheet";
+import SpecProperties, { PropertyGrid } from "./components/SpecProperties";
+import Roadmap from "./components/Roadmap";
 import {
   completion,
   decisionKey,
@@ -40,7 +47,8 @@ import {
   type Status,
 } from "./progress";
 
-const roleIcons = {
+type ProgressSetter = Dispatch<SetStateAction<Progress>>;
+const icons = {
   orchestrator: GitBranch,
   scout: Compass,
   builder: Hammer,
@@ -48,42 +56,18 @@ const roleIcons = {
   sentinel: Radio,
   curator: BookOpen,
 };
-const phases = [
-  {
-    title: "One bounded run",
-    subtitle: "Build the Box + single-worker kernel",
-    description:
-      "Start with a path-bounded workspace, an append-only ledger, and a Builder that knows when to stop.",
-    agents: ["builder"],
-  },
-  {
-    title: "Earn the right to merge",
-    subtitle: "Add the Builder ↔ Critic dyad",
-    description:
-      "Stage changes in isolation. Promote a patch only after deterministic checks and a verification receipt.",
-    agents: ["critic"],
-  },
-  {
-    title: "Coordinate with intent",
-    subtitle: "Add orchestration + parallel recon",
-    description:
-      "Route work through an explicit task graph. Give workers compact evidence instead of an entire repository.",
-    agents: ["orchestrator", "scout"],
-  },
-  {
-    title: "React, then remember",
-    subtitle: "Add the Sentinel + Memory Curator",
-    description:
-      "Wake on real events and turn verified outcomes into reusable, redacted lessons.",
-    agents: ["sentinel", "curator"],
-  },
+const tabs = ["architecture", "milestones", "decisions"] as const;
+type DetailTab = (typeof tabs)[number];
+const nav = [
+  { id: "archetypes", label: "Agent archetypes", icon: LayoutGrid },
+  { id: "map", label: "System map", icon: Network },
+  { id: "roadmap", label: "Build roadmap", icon: ListChecks },
 ];
-
-function RoleIcon({ agent, size = 24 }: { agent: Archetype; size?: number }) {
-  const Icon = roleIcons[agent.id];
+function RoleIcon({ agent, size = 17 }: { agent: Archetype; size?: number }) {
+  const Icon = icons[agent.id];
   return (
     <span className={`role-icon ${agent.color}`}>
-      <Icon size={size} strokeWidth={1.7} />
+      <Icon size={size} />
     </span>
   );
 }
@@ -93,20 +77,6 @@ function StatusBadge({ status }: { status: Status }) {
       <span />
       {status}
     </span>
-  );
-}
-function ProgressBar({ value, total }: { value: number; total: number }) {
-  return (
-    <div
-      className="progress-track"
-      role="progressbar"
-      aria-label="Completed milestones"
-      aria-valuenow={value}
-      aria-valuemin={0}
-      aria-valuemax={total}
-    >
-      <span style={{ width: `${total ? (value / total) * 100 : 0}%` }} />
-    </div>
   );
 }
 function readInitial() {
@@ -120,39 +90,58 @@ function readInitial() {
     return {
       progress: emptyProgress(),
       error:
-        "Existing progress could not be loaded. Import a valid backup to resume saving.",
+        "Existing progress could not be loaded. Import a valid backup to resume saving. The stored record has been preserved.",
     };
   }
 }
-function routeFromHash() {
-  return window.location.hash.slice(1) || "archetypes";
+const currentRoute = () => window.location.hash.slice(1) || "archetypes";
+function routeFor(agent: Archetype, tab: DetailTab, block?: string) {
+  return `#agent/${agent.id}?tab=${tab}${block ? `&block=${block}` : ""}`;
 }
 
 export default function App() {
   const [initial] = useState(readInitial);
   const [progress, setProgress] = useState<Progress>(initial.progress);
   const [storageError, setStorageError] = useState(initial.error);
-  const [route, setRoute] = useState(routeFromHash);
+  const [route, setRoute] = useState(currentRoute);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [importCandidate, setImportCandidate] = useState<Progress | null>(null);
-  const importInput = useRef<HTMLInputElement>(null);
-  const main = useRef<HTMLElement>(null);
-  const selected = route.startsWith("agent/")
-    ? archetypes.find((a) => a.id === route.split("/")[1])
+  const input = useRef<HTMLInputElement>(null),
+    main = useRef<HTMLElement>(null),
+    menuButton = useRef<HTMLButtonElement>(null);
+  const path = route.split("?")[0],
+    query = new URLSearchParams(route.split("?")[1] || "");
+  const selected = path.startsWith("agent/")
+    ? archetypes.find((a) => a.id === path.split("/")[1])
     : undefined;
-  const total = archetypes.reduce((n, a) => n + a.milestones.length, 0);
-  const done = archetypes.reduce((n, a) => n + completion(a, progress), 0);
-  const percent = Math.round((done / total) * 100);
+  const rawTab = query.get("tab"),
+    tab: DetailTab = tabs.includes(rawTab as DetailTab)
+      ? (rawTab as DetailTab)
+      : "architecture";
+  const block = query.get("block") || undefined;
+  const milestoneDone = archetypes.reduce(
+      (n, a) => n + completion(a, progress),
+      0,
+    ),
+    milestoneTotal = archetypes.reduce((n, a) => n + a.milestones.length, 0);
+  const issueDone = roadmapIssues.filter(
+    (issue) => progress.issues[issue.id]?.complete,
+  ).length;
   useEffect(() => {
-    const onHash = () => {
-      setRoute(routeFromHash());
+    let lastPath = currentRoute().split("?")[0];
+    const update = () => {
+      const next = currentRoute();
+      setRoute(next);
       setMobileOpen(false);
-      window.scrollTo(0, 0);
-      main.current?.focus();
+      if (lastPath !== next.split("?")[0]) {
+        window.scrollTo(0, 0);
+        main.current?.focus();
+      }
+      lastPath = next.split("?")[0];
     };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
   }, []);
   useEffect(() => {
     if (storageError.startsWith("Existing")) return;
@@ -166,13 +155,24 @@ export default function App() {
   }, [progress, storageError]);
   useEffect(() => {
     if (toast) {
-      const timer = window.setTimeout(() => setToast(""), 4500);
+      const timer = window.setTimeout(() => setToast(""), 5000);
       return () => clearTimeout(timer);
     }
   }, [toast]);
   useEffect(() => {
-    document.title = `${selected?.shortName || (route === "map" ? "System map" : route === "roadmap" ? "Build roadmap" : "Archetypes")} · Agent Architect`;
-  }, [selected, route]);
+    document.title = `${selected?.shortName || nav.find((n) => n.id === path)?.label || "Vault"} · Agent Architect`;
+  }, [path, selected]);
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        menuButton.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", escape);
+    return () => window.removeEventListener("keydown", escape);
+  }, [mobileOpen]);
   function exportProgress() {
     const url = URL.createObjectURL(
       new Blob([JSON.stringify(progress, null, 2)], {
@@ -181,29 +181,26 @@ export default function App() {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `agent-architect-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `agent-architect-${new Date().toLocaleDateString("en-CA")}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setToast("Progress backup exported. Keep it with your project.");
+    setToast("Progress v2 backup exported.");
   }
   async function importProgress(file?: File) {
     if (!file) return;
     try {
-      if (file.size > 2_000_000)
-        throw new Error("Choose a backup smaller than 2 MB.");
+      if (file.size > 8_000_000)
+        throw new Error("Choose a progress backup smaller than 8 MB.");
       setImportCandidate(parseProgress(JSON.parse(await file.text())));
     } catch (error) {
       setToast(
-        error instanceof Error ? error.message : "Could not read that backup.",
+        error instanceof Error
+          ? error.message
+          : "Unable to read progress backup.",
       );
     }
-    if (importInput.current) importInput.current.value = "";
+    if (input.current) input.current.value = "";
   }
-  const nav = [
-    { id: "archetypes", label: "Agent archetypes", icon: LayoutGrid },
-    { id: "map", label: "System map", icon: Network },
-    { id: "roadmap", label: "Build roadmap", icon: Map },
-  ];
   return (
     <>
       <a
@@ -230,75 +227,94 @@ export default function App() {
         <a
           className="brand"
           href="#archetypes"
-          aria-label="Agent Architect home"
           onClick={() => setMobileOpen(false)}
         >
-          <span className="brand-symbol">
-            <Box size={25} strokeWidth={1.6} />
-          </span>
+          <Box size={23} />
           <span>
-            agent<span className="brand-light">architect</span>
-            <small>A PERSONAL ENGINEERING LAB</small>
+            agent<span>architect</span>
+            <small>ENGINEERING KNOWLEDGE VAULT</small>
           </span>
         </a>
-        <div className="workspace-chip">
-          <span className="workspace-symbol">A</span>
-          <div>
-            AgentBox workspace<small>Learning & implementation</small>
-          </div>
-          <ChevronDown size={14} />
+        <div className="workspace-label">
+          <span className="local-dot" />
+          <code>LOCAL / agentbox</code>
+          <span>v0.2</span>
         </div>
-        <div className="nav-label">YOUR FIELD GUIDE</div>
         <nav aria-label="Main navigation">
           {nav.map(({ id, label, icon: Icon }) => (
             <a
-              key={id}
               href={`#${id}`}
+              key={id}
               onClick={() => setMobileOpen(false)}
               className={
-                (selected ? id === "archetypes" : route === id) ? "active" : ""
+                (selected ? id === "archetypes" : path === id) ? "active" : ""
               }
               aria-current={
-                (selected ? id === "archetypes" : route === id)
+                (selected ? id === "archetypes" : path === id)
                   ? "page"
                   : undefined
               }
             >
-              <Icon size={18} />
+              <Icon size={15} />
               {label}
-              {id === "archetypes" && <span className="nav-count">06</span>}
+              {id === "archetypes" && <code>06</code>}
             </a>
           ))}
         </nav>
-        <div className="sidebar-philosophy">
-          <span className="nav-label">THE LEARNING LOOP</span>
-          <div>
-            <span>01</span> Understand the mechanics
-          </div>
-          <div>
-            <span>02</span> Make the decision
-          </div>
-          <div>
-            <span>03</span> Build & verify
-          </div>
-          <div>
-            <span>04</span> Capture the evidence
-          </div>
+        <div className="sidebar-label">MODULE INDEX</div>
+        <nav className="module-nav" aria-label="Agent modules">
+          {archetypes.map((a) => (
+            <a
+              href={`#agent/${a.id}`}
+              key={a.id}
+              onClick={() => setMobileOpen(false)}
+              aria-current={selected?.id === a.id ? "page" : undefined}
+              className={selected?.id === a.id ? "active" : ""}
+            >
+              <RoleIcon agent={a} size={13} />
+              <span>{a.shortName}</span>
+              <code>{String(a.stage).padStart(2, "0")}</code>
+            </a>
+          ))}
+        </nav>
+        <div className="sidebar-links">
+          <span className="sidebar-label">SOURCE / RECORDS</span>
+          <a
+            href="https://github.com/LucasTechVault/agent-architect/tree/main/docs/adr"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <BookOpen size={13} />
+            Architecture records
+            <ArrowUpRight size={11} />
+          </a>
+          <a
+            href="https://github.com/LucasTechVault/agentbox-core"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Code2 size={13} />
+            agentbox-core
+            <ArrowUpRight size={11} />
+          </a>
         </div>
         <div className="sidebar-bottom">
-          <div className="sidebar-progress">
-            <div>
-              <span>Your build progress</span>
-              <strong>{percent}%</strong>
-            </div>
-            <ProgressBar value={done} total={total} />
-            <small>
-              {done} of {total} milestones verified
-            </small>
+          <div>
+            <span>Role milestones</span>
+            <code>
+              {milestoneDone}/{milestoneTotal}
+            </code>
           </div>
-          <div className="local-indicator">
-            <span />
-            Local workspace<span className="version">v0.1</span>
+          <div>
+            <span>Engineering issues</span>
+            <code>
+              {issueDone}/{roadmapIssues.length}
+            </code>
+          </div>
+          <small>Personal verification records</small>
+          <div className="local-record">
+            <span className="local-dot" />
+            localStorage<code>schema v2</code>
           </div>
         </div>
       </aside>
@@ -306,1019 +322,883 @@ export default function App() {
         <header className="topbar">
           <div className="breadcrumb">
             <button
+              ref={menuButton}
               className="icon-button mobile-toggle"
               aria-label="Open navigation"
               aria-expanded={mobileOpen}
               aria-controls="sidebar-navigation"
               onClick={() => setMobileOpen(true)}
             >
-              <Menu size={20} />
+              <Menu size={17} />
             </button>
-            <Layers3 size={17} />
-            <span>Learning workspace</span>
-            <ChevronRight size={14} />
-            <strong>
-              {selected?.shortName ||
-                nav.find((n) => n.id === route)?.label ||
-                "Field guide"}
-            </strong>
+            <span>vault</span>
+            <ChevronRight size={12} />
+            <strong>{selected ? `agents / ${selected.id}` : path}</strong>
+            <span className="header-version">SPEC v0.2</span>
           </div>
           <div className="topbar-actions">
-            <span className="saved">
-              <span />
-              {storageError ? "Backup needed" : "Saved on this device"}
+            <span className="save-state">
+              <span className="local-dot" />
+              {storageError ? "backup required" : "saved locally"}
             </span>
             <button
-              className="button quiet compact"
+              className="button"
+              aria-label="Import backup"
+              onClick={() => input.current?.click()}
+            >
+              <Upload size={13} />
+              <span>Import</span>
+            </button>
+            <button
+              className="button"
               aria-label="Export progress"
               onClick={exportProgress}
             >
-              <Download size={15} />
-              <span>Export progress</span>
+              <Download size={13} />
+              <span>Export</span>
             </button>
-            <span className="avatar" aria-label="Personal workspace">
-              YOU
-            </span>
           </div>
         </header>
         <main id="main-content" tabIndex={-1} ref={main}>
           {storageError && (
             <div className="storage-warning" role="alert">
-              {storageError}
-              <button onClick={() => importInput.current?.click()}>
+              <span>{storageError}</span>
+              <button onClick={() => input.current?.click()}>
                 Import backup
               </button>
             </div>
           )}
           {selected ? (
             <AgentDetail
-              key={selected.id}
               agent={selected}
               progress={progress}
               setProgress={setProgress}
+              tab={tab}
+              activeBlock={block}
             />
-          ) : route === "map" ? (
+          ) : path === "archetypes" ? (
+            <Registry progress={progress} />
+          ) : path === "map" ? (
             <SystemMap progress={progress} />
-          ) : route === "roadmap" ? (
-            <Roadmap progress={progress} />
-          ) : route === "archetypes" ? (
-            <Home progress={progress} />
+          ) : path === "roadmap" ? (
+            <>
+              <DocumentHeader
+                section="IMPLEMENTATION / PHASED DELIVERY"
+                title="Engineering implementation ledger"
+                path="agent-architect/src/data/roadmap.ts → agentbox-core/src/"
+              />
+              <PropertyGrid
+                properties={[
+                  {
+                    label: "Module Path",
+                    value: <code>agentbox-core/src/</code>,
+                  },
+                  {
+                    label: "Runtime Pattern",
+                    value:
+                      "Bounded kernel → verification → coordination → events",
+                  },
+                  {
+                    label: "State Mutability",
+                    value:
+                      "Versioned personal receipts; engine state is separate",
+                  },
+                  {
+                    label: "Token Budget Tier",
+                    value: "Per-run limits + per-role proposed caps",
+                  },
+                  {
+                    label: "Verification Gate",
+                    value: "Commit / test / PR evidence + explicit check",
+                  },
+                  {
+                    label: "Implementation Status",
+                    value: `${issueDone}/${roadmapIssues.length} issues verified by you`,
+                  },
+                ]}
+              />
+              <Roadmap progress={progress} setProgress={setProgress} />
+            </>
           ) : (
             <div className="empty-state">
-              <Compass size={34} />
-              <h1>That page is off the map.</h1>
-              <a className="button primary" href="#archetypes">
-                Back to archetypes
-              </a>
+              <h1>Unknown document</h1>
+              <a href="#archetypes">Return to agent registry</a>
             </div>
           )}
           <footer className="page-footer">
+            <code>agent-architect / v0.2</code>
             <span>
-              <Box size={14} />
-              Designed to understand. Built to remember.
+              Specifications describe target behavior. Verification is
+              self-recorded.
             </span>
-            <div>
-              <button onClick={() => importInput.current?.click()}>
-                <Upload size={13} />
-                Import backup
-              </button>
-              <span>Progress stays in this browser.</span>
-            </div>
+            <span>Local records · export to back up</span>
           </footer>
         </main>
       </div>
       <input
-        ref={importInput}
+        ref={input}
         className="sr-only"
-        aria-label="Import progress backup"
         type="file"
         accept="application/json,.json"
+        aria-label="Import progress file"
         onChange={(e) => void importProgress(e.target.files?.[0])}
       />
       {toast && (
         <div className="toast" role="status">
-          <CheckCheck size={18} />
+          <CheckCheck size={14} />
           {toast}
           <button
             aria-label="Dismiss notification"
             onClick={() => setToast("")}
           >
-            <X size={16} />
+            <X size={13} />
           </button>
         </div>
       )}
       {importCandidate && (
-        <div className="modal-backdrop">
-          <div
-            className="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="import-title"
-          >
-            <span className="eyebrow">PROGRESS BACKUP</span>
-            <h2 id="import-title">Restore this learning journey?</h2>
-            <p>
-              This replaces your current checklist, decisions, and notes with
-              the selected backup. Export your current progress first if you
-              want to keep both.
-            </p>
-            <div className="modal-actions">
-              <button
-                autoFocus
-                className="button quiet"
-                onClick={() => setImportCandidate(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="button primary"
-                onClick={() => {
-                  setProgress(importCandidate);
-                  setStorageError("");
-                  setImportCandidate(null);
-                  setToast("Your progress backup has been restored.");
-                }}
-              >
-                Restore progress
-              </button>
-            </div>
-          </div>
-        </div>
+        <RestoreDialog
+          onCancel={() => setImportCandidate(null)}
+          onRestore={() => {
+            setProgress(importCandidate);
+            setStorageError("");
+            setImportCandidate(null);
+            setToast(
+              "Progress restored. Legacy records are retained in schema v2.",
+            );
+          }}
+        />
       )}
     </>
   );
 }
-
-function PageHeading({
-  label,
+function RestoreDialog({
+  onCancel,
+  onRestore,
+}: {
+  onCancel: () => void;
+  onRestore: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const node = dialog.current;
+    node?.showModal();
+    return () => node?.close();
+  }, []);
+  return (
+    <dialog
+      className="restore-dialog"
+      ref={dialog}
+      aria-labelledby="restore-title"
+      onCancel={(e) => {
+        e.preventDefault();
+        onCancel();
+      }}
+    >
+      <span className="section-caption">IMPORT / PROGRESS RECORDS</span>
+      <h2 id="restore-title">Restore progress backup?</h2>
+      <p>
+        This replaces the current issues, milestones, notes, decisions, and
+        takeaways. Export first to retain the current records. Version 1 backups
+        migrate automatically.
+      </p>
+      <div className="dialog-actions">
+        <button autoFocus className="button" onClick={onCancel}>
+          Cancel
+        </button>
+        <button className="button primary" onClick={onRestore}>
+          Restore progress
+        </button>
+      </div>
+    </dialog>
+  );
+}
+function DocumentHeader({
+  section,
   title,
+  path,
   children,
 }: {
-  label: string;
+  section: string;
   title: string;
-  children: ReactNode;
+  path: string;
+  children?: ReactNode;
 }) {
   return (
-    <div className="page-heading">
-      <span className="eyebrow">
-        <span className="tiny-square" />
-        {label}
-      </span>
-      <h1>{title}</h1>
-      <p>{children}</p>
+    <div className="document-header">
+      <div>
+        <div className="section-caption">{section}</div>
+        <h1>{title}</h1>
+        <code className="document-path">{path}</code>
+      </div>
+      {children}
     </div>
   );
 }
-
-function Home({ progress }: { progress: Progress }) {
+function Registry({ progress }: { progress: Progress }) {
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("all");
-  const done = archetypes.reduce((n, a) => n + completion(a, progress), 0);
-  const total = archetypes.reduce((n, a) => n + a.milestones.length, 0);
-  const verified = archetypes.filter(
-    (a) => statusOf(a, progress) === "Verified",
-  ).length;
-  const next = [...archetypes]
-    .sort((a, b) => a.stage - b.stage)
-    .find((a) => statusOf(a, progress) !== "Verified");
   const visible = archetypes.filter(
     (a) =>
       (filter === "all" || statusOf(a, progress) === filter) &&
-      `${a.name} ${a.tag} ${a.runtime} ${a.topology}`
+      `${a.name} ${a.runtime} ${a.topology} ${engineeringSpecs[a.id].modulePath} ${a.artifacts.join(" ")}`
         .toLowerCase()
         .includes(search.toLowerCase()),
   );
+  const totalDone = archetypes.reduce((n, a) => n + completion(a, progress), 0);
   return (
     <>
-      <PageHeading
-        label="AIE–10 / THE AGENT ARCHITECTURE FIELD GUIDE"
-        title="Different minds. One system."
+      <DocumentHeader
+        section="SPEC // AGENTBOX-CORE // AGENT REGISTRY"
+        title="Agent archetypes"
+        path="agentbox-core/src/agents/* (target modules)"
       >
-        Understand the roles. Make the trade-offs. Build an agent system you can
-        explain.
-      </PageHeading>
-      <section className="overview" aria-label="Learning overview">
-        <div className="overview-intro">
-          <span className="eyebrow">YOUR BUILD, AT A GLANCE</span>
-          <div className="overview-numbers">
-            <strong>
-              {Math.round((done / total) * 100)}
-              <span>%</span>
-            </strong>
-            <div>
-              <b>
-                From understanding
-                <br />
-                to implementation.
-              </b>
-              <span>
-                {done} of {total} milestones verified
-              </span>
-            </div>
-          </div>
-          <ProgressBar value={done} total={total} />
-        </div>
-        <div className="overview-stats">
-          <div>
-            <span className="stat-icon">
-              <Layers3 size={17} />
-            </span>
-            <strong>06</strong>
-            <span>Specialist archetypes</span>
-          </div>
-          <div>
-            <span className="stat-icon">
-              <CheckCheck size={17} />
-            </span>
-            <strong>
-              {String(verified).padStart(2, "0")}
-              <small> / 06</small>
-            </strong>
-            <span>Archetypes verified</span>
-          </div>
-        </div>
-        <a className="next-step" href={next ? `#agent/${next.id}` : "#roadmap"}>
-          <span className="eyebrow">
-            <span className="live-dot" />
-            {done ? "KEEP THE MOMENTUM" : "A GOOD PLACE TO START"}
-          </span>
-          <div>
-            <span>
-              {next ? `Meet ${next.name}` : "Review your engineering journey"}
-            </span>
-            <ArrowUpRight size={20} />
-          </div>
-          <p>
-            {next
-              ? `Phase ${String(next.stage).padStart(2, "0")} · ${phases[next.stage - 1].subtitle}`
-              : "Revisit your evidence and architectural decisions."}
-          </p>
-        </a>
-      </section>
-      <div className="section-toolbar">
-        <div className="section-title">
-          <h2>
-            The agent roster <span>06</span>
-          </h2>
-          <p>Six distinct responsibilities. Six architectures to master.</p>
+        <span className="document-badge">06 ROLES / 54 SPEC BLOCKS</span>
+      </DocumentHeader>
+      <PropertyGrid
+        properties={[
+          {
+            label: "Module Path",
+            value: <code>agentbox-core/src/agents/* (planned)</code>,
+          },
+          {
+            label: "Runtime Pattern",
+            value: "State machine / bounded loop / pipeline / actor",
+          },
+          {
+            label: "State Mutability",
+            value: "Single task-graph writer; immutable handoffs (target)",
+          },
+          {
+            label: "Token Budget Tier",
+            value: "Role-scoped admission limits (proposed)",
+          },
+          {
+            label: "Verification Gate",
+            value: "Independent receipts before promotion (planned)",
+          },
+          {
+            label: "Implementation Status",
+            value: `Kernel scaffold · ${totalDone}/30 personal milestones`,
+          },
+        ]}
+      />
+      <div className="registry-toolbar">
+        <div>
+          <strong>Specification index</strong>
+          <span>{visible.length} / 6 documents</span>
         </div>
         <div className="filter-controls">
-          <div className="search-field">
-            <Search size={16} />
+          <label className="search-control">
+            <Search size={13} />
             <input
               aria-label="Search archetypes"
+              placeholder="Search role, runtime, module…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Find an archetype…"
             />
             {search && (
               <button aria-label="Clear search" onClick={() => setSearch("")}>
-                <X size={14} />
+                <X size={12} />
               </button>
             )}
-          </div>
-          <div className="select-wrap">
-            <select
-              aria-label="Filter by status"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            >
-              <option value="all">All statuses</option>
-              <option>Not Started</option>
-              <option>In Progress</option>
-              <option>Verified</option>
-            </select>
-            <ChevronDown size={14} />
-          </div>
+          </label>
+          <select
+            aria-label="Filter by status"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="all">All personal statuses</option>
+            <option>Not Started</option>
+            <option>In Progress</option>
+            <option>Verified</option>
+          </select>
         </div>
       </div>
       <div className="archetype-grid">
-        {visible.map((agent) => (
-          <a
-            href={`#agent/${agent.id}`}
-            key={agent.id}
-            className={`archetype-card ${agent.color}`}
-          >
-            <div className="card-top">
-              <RoleIcon agent={agent} />
-              <span className="card-index">
-                0{archetypes.indexOf(agent) + 1}
-              </span>
-              <StatusBadge status={statusOf(agent, progress)} />
-            </div>
-            <span className="role-tag">{agent.tag}</span>
-            <h3>{agent.name}</h3>
-            <p className="card-description">{agent.summary}</p>
-            <div className="runtime-label">
-              <Network size={13} />
-              <span>{agent.runtime}</span>
-            </div>
-            <div className="card-progress">
-              <ProgressBar
-                value={completion(agent, progress)}
-                total={agent.milestones.length}
-              />
-              <div>
-                <span>
-                  {completion(agent, progress)} / {agent.milestones.length}{" "}
-                  milestones
+        {visible.map((a) => {
+          const spec = engineeringSpecs[a.id];
+          return (
+            <a
+              className={`archetype-card ${a.color}`}
+              href={`#agent/${a.id}`}
+              key={a.id}
+            >
+              <div className="card-heading">
+                <RoleIcon agent={a} />
+                <span className="identifier">
+                  AGENT.{String(archetypes.indexOf(a) + 1).padStart(2, "0")}
                 </span>
-                <span className="explore">
-                  Explore archetype <ArrowRight size={14} />
+                <StatusBadge status={statusOf(a, progress)} />
+              </div>
+              <h2>
+                {a.name}
+                <ArrowUpRight size={13} />
+              </h2>
+              <p>{a.purpose}</p>
+              <dl className="card-properties">
+                <div>
+                  <dt>RUNTIME</dt>
+                  <dd>
+                    <code>{a.runtime}</code>
+                  </dd>
+                </div>
+                <div>
+                  <dt>STATE</dt>
+                  <dd>{spec.stateMutability}</dd>
+                </div>
+                <div>
+                  <dt>GATE</dt>
+                  <dd>{spec.verificationGate}</dd>
+                </div>
+              </dl>
+              <div className="card-boundary">
+                <span className="field-label">AUTHORITY</span>
+                <p>{spec.blocks[0].decision}</p>
+              </div>
+              <div className="tool-chips">
+                {a.allowedTools.slice(0, 3).map((tool) => (
+                  <code key={tool}>{tool}</code>
+                ))}
+              </div>
+              <div className="card-footer">
+                <code>{spec.modulePath}</code>
+                <span>
+                  {completion(a, progress)}/{a.milestones.length} milestones ·{" "}
+                  {spec.implementation}
                 </span>
               </div>
-            </div>
-          </a>
-        ))}
+            </a>
+          );
+        })}
       </div>
       {!visible.length && (
         <div className="empty-state">
-          <Search size={30} />
-          <h3>No archetypes match your search.</h3>
-          <p>Try a role, runtime, or another status.</p>
+          <h2>No matching specifications</h2>
           <button
-            className="button quiet"
+            className="button"
             onClick={() => {
-              setFilter("all");
               setSearch("");
+              setFilter("all");
             }}
           >
             Clear filters
           </button>
         </div>
       )}
-      <div className="principle-banner">
-        <span className="principle-icon">
-          <Sparkles size={20} />
+      <div className="registry-footnote">
+        <span>
+          <Code2 size={13} />9 building blocks + typed I/O contracts per role
         </span>
-        <div>
-          <strong>Learn the architecture. Build the evidence.</strong>
-          <p>
-            A checked box means more when you can point to a test, a diff, or a
-            decision you can defend.
-          </p>
-        </div>
         <a href="#roadmap">
-          See the build path <ArrowRight size={16} />
+          Open {roadmapIssues.length} implementation issues
+          <ArrowRight size={12} />
         </a>
       </div>
     </>
   );
 }
-
 function AgentDetail({
+  agent,
+  progress,
+  setProgress,
+  tab,
+  activeBlock,
+}: {
+  agent: Archetype;
+  progress: Progress;
+  setProgress: ProgressSetter;
+  tab: DetailTab;
+  activeBlock?: string;
+}) {
+  const done = completion(agent, progress),
+    spec = engineeringSpecs[agent.id];
+  function openTab(next: DetailTab) {
+    window.location.hash = routeFor(agent, next).slice(1);
+  }
+  return (
+    <>
+      <a href="#archetypes" className="back-link">
+        <ArrowLeft size={12} />
+        archetypes / registry
+      </a>
+      <DocumentHeader
+        section={`SPEC // AGENTBOX-CORE // ${agent.tag.toUpperCase()}`}
+        title={agent.name}
+        path={spec.modulePath}
+      >
+        <span className="document-badge">
+          v{spec.version} / PHASE 0{agent.stage}
+        </span>
+        <StatusBadge status={statusOf(agent, progress)} />
+      </DocumentHeader>
+      <SpecProperties agent={agent} progress={progress} />
+      <div className="detail-tabs" role="tablist" aria-label="Archetype detail">
+        {tabs.map((id, i) => (
+          <button
+            id={`tab-${id}`}
+            role="tab"
+            key={id}
+            aria-selected={tab === id}
+            aria-controls={`panel-${id}`}
+            tabIndex={tab === id ? 0 : -1}
+            className={tab === id ? "active" : ""}
+            onClick={() => openTab(id)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                e.preventDefault();
+                const next = tabs[(i + (e.key === "ArrowRight" ? 1 : 2)) % 3];
+                openTab(next);
+                document.getElementById(`tab-${next}`)?.focus();
+              }
+            }}
+          >
+            {id === "architecture" ? (
+              <Network size={13} />
+            ) : id === "milestones" ? (
+              <ListChecks size={13} />
+            ) : (
+              <BookOpen size={13} />
+            )}
+            <span>
+              {id === "architecture"
+                ? "Architecture"
+                : id === "milestones"
+                  ? `Build milestones (${done}/${agent.milestones.length})`
+                  : "Decisions & recall"}
+            </span>
+          </button>
+        ))}
+      </div>
+      <section
+        className="tab-panel"
+        id={`panel-${tab}`}
+        aria-labelledby={`tab-${tab}`}
+        role="tabpanel"
+      >
+        {tab === "architecture" && (
+          <>
+            <EngineeringSheet agent={agent} activeBlock={activeBlock} />
+            <Takeaways
+              agent={agent}
+              progress={progress}
+              setProgress={setProgress}
+            />
+          </>
+        )}
+        {tab === "milestones" && (
+          <Milestones
+            agent={agent}
+            progress={progress}
+            setProgress={setProgress}
+          />
+        )}
+        {tab === "decisions" && (
+          <Decisions
+            agent={agent}
+            progress={progress}
+            setProgress={setProgress}
+            activeBlock={activeBlock}
+          />
+        )}
+      </section>
+      <div className="agent-pagination">
+        <a href="#roadmap">
+          Phase 0{agent.stage} /{" "}
+          {roadmapPhases.find((p) => p.id === agent.stage)?.title}
+          <ArrowRight size={12} />
+        </a>
+        <a
+          href={`#agent/${archetypes[(archetypes.indexOf(agent) + 1) % archetypes.length].id}`}
+        >
+          Next specification
+          <ChevronRight size={12} />
+        </a>
+      </div>
+    </>
+  );
+}
+function Milestones({
   agent,
   progress,
   setProgress,
 }: {
   agent: Archetype;
   progress: Progress;
-  setProgress: React.Dispatch<React.SetStateAction<Progress>>;
+  setProgress: ProgressSetter;
 }) {
-  const [tab, setTab] = useState("architecture");
-  const [expanded, setExpanded] = useState<string | null>(
-    agent.milestones[0]?.id ?? null,
-  );
-  const done = completion(agent, progress);
-  function updateMilestone(
+  function update(
     id: string,
-    update: Partial<{ complete: boolean; evidence: string }>,
+    patch: Partial<{ complete: boolean; evidence: string }>,
   ) {
     const key = milestoneKey(agent, id);
     setProgress((p) => {
       const value = {
-        ...(p.milestones[key] ?? { complete: false, evidence: "" }),
-        ...update,
+        ...(p.milestones[key] || { complete: false, evidence: "" }),
+        ...patch,
       };
       if (!value.evidence.trim()) value.complete = false;
       return { ...p, milestones: { ...p.milestones, [key]: value } };
     });
   }
   return (
-    <>
-      <a href="#archetypes" className="back-link">
-        <ArrowLeft size={15} />
-        Back to the roster
-      </a>
-      <div className={`detail-heading ${agent.color}`}>
-        <RoleIcon agent={agent} size={32} />
+    <div className="milestone-panel">
+      <div className="panel-heading">
         <div>
-          <span className="eyebrow">
-            ARCHETYPE 0{archetypes.indexOf(agent) + 1} /{" "}
-            {agent.tag.toUpperCase()}
-          </span>
-          <h1>{agent.name}</h1>
-          <p>{agent.summary}</p>
+          <h2>Role implementation milestones</h2>
+          <p>
+            Legacy role checklist. Engineering issues are tracked separately in
+            the roadmap; each verification requires your evidence.
+          </p>
         </div>
-        <StatusBadge status={statusOf(agent, progress)} />
+        <code>
+          {completion(agent, progress)}/{agent.milestones.length}
+        </code>
       </div>
-      <div className="detail-facts">
-        <div>
-          <span>RUNTIME</span>
-          <strong>{agent.runtime}</strong>
-        </div>
-        <div>
-          <span>TOPOLOGY</span>
-          <strong>{agent.topology}</strong>
-        </div>
-        <div>
-          <span>BUILD PHASE</span>
-          <a href="#roadmap">
-            0{agent.stage} · {phases[agent.stage - 1].title}
-            <ArrowUpRight size={13} />
-          </a>
-        </div>
-      </div>
-      <div className="detail-tabs" role="tablist" aria-label="Archetype detail">
-        {[
-          { id: "architecture", label: "Architecture", icon: Network },
-          {
-            id: "milestones",
-            label: `Build milestones (${done}/${agent.milestones.length})`,
-            icon: CheckCheck,
-          },
-          { id: "decisions", label: "Decisions & recall", icon: BookOpen },
-        ].map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            id={`tab-${id}`}
-            role="tab"
-            aria-selected={tab === id}
-            aria-controls={`panel-${id}`}
-            tabIndex={tab === id ? 0 : -1}
-            className={tab === id ? "active" : ""}
-            onClick={() => setTab(id)}
-            onKeyDown={(event) => {
-              if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-                event.preventDefault();
-                const ids = ["architecture", "milestones", "decisions"];
-                const next =
-                  ids[
-                    (ids.indexOf(tab) + (event.key === "ArrowRight" ? 1 : 2)) %
-                      3
-                  ];
-                setTab(next);
-                document.getElementById(`tab-${next}`)?.focus();
-              }
-            }}
-          >
-            <Icon size={16} />
-            {label}
-          </button>
-        ))}
-      </div>
-      <section
-        role="tabpanel"
-        id={`panel-${tab}`}
-        aria-labelledby={`tab-${tab}`}
-        className="tab-panel"
-      >
-        {tab === "architecture" && (
-          <div className="architecture-detail">
-            <div className="detail-main">
-              <section className="panel mental-model">
-                <span className="eyebrow">01 / THE MENTAL MODEL</span>
-                <h2>{agent.mentalModel}</h2>
-                <p>{agent.purpose}</p>
-                <div className="failure-note">
-                  <CircleHelp size={17} />
-                  <div>
-                    <strong>What breaks without it?</strong>
-                    <p>{agent.failureMode}</p>
-                  </div>
+      {agent.milestones.map((m, i) => {
+        const record = progress.milestones[milestoneKey(agent, m.id)];
+        return (
+          <div className="milestone-record" key={m.id}>
+            <input
+              type="checkbox"
+              aria-label={`Verify ${m.title}`}
+              checked={!!record?.complete}
+              disabled={!record?.evidence.trim()}
+              onChange={(e) => update(m.id, { complete: e.target.checked })}
+            />
+            <details open={i === 0}>
+              <summary>
+                <code>M{String(i + 1).padStart(2, "0")}</code>
+                <strong>{m.title}</strong>
+                <ChevronRight size={13} />
+              </summary>
+              <div className="record-body">
+                <p>{m.detail}</p>
+                <div className="verification-callout">
+                  <span className="field-label">ACCEPTANCE TEST</span>
+                  <p>{m.proof}</p>
                 </div>
-              </section>
-              <section className="panel flow-panel">
-                <div className="panel-title">
-                  <span className="eyebrow">02 / RUNTIME & TOPOLOGY</span>
-                  <span className="subtle-tag">{agent.flow.length} steps</span>
-                </div>
-                <h2>Follow the execution.</h2>
-                <div className="execution-flow">
-                  {agent.flow.map((step, i) => (
-                    <div className="execution-step" key={step.label}>
-                      <span className="step-number">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <div>
-                        <strong>{step.label}</strong>
-                        <p>{step.detail}</p>
-                      </div>
-                      {i < agent.flow.length - 1 && (
-                        <ChevronDown size={15} className="flow-down" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="bound-note">
-                  <ShieldCheck size={16} />
-                  <span>
-                    <strong>The stopping rule</strong>
-                    {agent.loopBound}
-                  </span>
-                </div>
-              </section>
-            </div>
-            <aside className="detail-aside">
-              <section className="panel">
-                <span className="eyebrow">03 / STATE OWNERSHIP</span>
-                <h3>One clear source of truth.</h3>
-                <ul className="policy-list">
-                  {agent.stateOwnership.map((item) => (
-                    <li key={item}>
-                      <Layers3 size={15} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <div className="artifact-list">
-                  {agent.artifacts.map((item) => (
-                    <code key={item}>{item}</code>
-                  ))}
-                </div>
-              </section>
-              <section className="panel">
-                <span className="eyebrow">04 / TOOL BOUNDARIES</span>
-                <div className="tool-group">
-                  <h4>
-                    <Check size={14} />
-                    Allowed capabilities
-                  </h4>
-                  <div>
-                    {agent.allowedTools.map((tool) => (
-                      <code key={tool}>{tool}</code>
-                    ))}
-                  </div>
-                </div>
-                <div className="tool-group forbidden">
-                  <h4>
-                    <X size={14} />
-                    Outside its authority
-                  </h4>
-                  <div>
-                    {agent.forbiddenTools.map((tool) => (
-                      <code key={tool}>{tool}</code>
-                    ))}
-                  </div>
-                </div>
-              </section>
-              <section className="model-note">
-                <Sparkles size={18} />
-                <div>
-                  <h4>Model & context strategy</h4>
-                  <p>{agent.modelStrategy}</p>
-                  <p>{agent.contextStrategy}</p>
-                </div>
-              </section>
-            </aside>
+                <label htmlFor={`evidence-${m.id}`}>
+                  Verification receipt · commit / test path / PR / result
+                </label>
+                <textarea
+                  id={`evidence-${m.id}`}
+                  rows={2}
+                  maxLength={20000}
+                  value={record?.evidence || ""}
+                  placeholder="Record the implementation evidence…"
+                  onChange={(e) => update(m.id, { evidence: e.target.value })}
+                />
+                <small>
+                  Add a receipt to enable the verification checkbox. Records are
+                  not checked against GitHub automatically.
+                </small>
+              </div>
+            </details>
           </div>
-        )}
-        {tab === "milestones" && (
-          <div className="milestone-layout">
-            <section className="panel">
-              <div className="panel-title">
-                <div>
-                  <span className="eyebrow">BUILD IT IN AGENTBOX-CORE</span>
-                  <h2>From concept to proof.</h2>
-                </div>
-                <span className="milestone-fraction">
-                  {done}
-                  <small>/{agent.milestones.length}</small>
-                </span>
-              </div>
-              <p className="section-description">
-                Add evidence, then verify each milestone. These are your
-                learning records; they do not run or inspect the engine.
-              </p>
-              <ProgressBar value={done} total={agent.milestones.length} />
-              <div className="milestone-list">
-                {agent.milestones.map((m, i) => {
-                  const item = progress.milestones[milestoneKey(agent, m.id)];
-                  const open = expanded === m.id;
-                  return (
-                    <div
-                      className={`milestone ${item?.complete ? "complete" : ""}`}
-                      key={m.id}
-                    >
-                      <button
-                        className="check-box"
-                        role="checkbox"
-                        aria-checked={!!item?.complete}
-                        aria-label={`Verify ${m.title}`}
-                        title={
-                          item?.evidence.trim()
-                            ? "Toggle milestone verification"
-                            : "Add evidence below to verify this milestone"
-                        }
-                        onClick={() =>
-                          item?.evidence.trim()
-                            ? updateMilestone(m.id, {
-                                complete: !item.complete,
-                              })
-                            : setExpanded(m.id)
-                        }
-                      >
-                        {item?.complete && <Check size={15} />}
-                      </button>
-                      <div className="milestone-body">
-                        <button
-                          className="milestone-heading"
-                          aria-expanded={open}
-                          aria-controls={`milestone-${m.id}`}
-                          onClick={() => setExpanded(open ? null : m.id)}
-                        >
-                          <span>
-                            <small>{String(i + 1).padStart(2, "0")}</small>
-                            {m.title}
-                          </span>
-                          <ChevronDown
-                            size={17}
-                            className={open ? "rotated" : ""}
-                          />
-                        </button>
-                        {open && (
-                          <div
-                            id={`milestone-${m.id}`}
-                            className="milestone-evidence"
-                          >
-                            <p>{m.detail}</p>
-                            <div className="proof-hint">
-                              <ShieldCheck size={15} />
-                              <span>{m.proof}</span>
-                            </div>
-                            <label htmlFor={`evidence-${m.id}`}>
-                              Your evidence{" "}
-                              <span>
-                                Test output, commit, or a short explanation
-                              </span>
-                            </label>
-                            <textarea
-                              id={`evidence-${m.id}`}
-                              maxLength={20000}
-                              rows={3}
-                              placeholder="What did you build, and how did you verify it?"
-                              value={item?.evidence || ""}
-                              onChange={(e) =>
-                                updateMilestone(m.id, {
-                                  evidence: e.target.value,
-                                })
-                              }
-                            />
-                            <span className="input-hint">
-                              {item?.complete
-                                ? "Verified by you · evidence saved locally"
-                                : "Write your evidence, then check the milestone to verify it."}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-            <aside className="learning-note">
-              <span className="note-mark">↗</span>
-              <span className="eyebrow">PROGRESS WITH SUBSTANCE</span>
-              <h3>Could you explain it without the code?</h3>
-              <p>
-                Before checking a milestone, describe the invariant it protects,
-                the trade-off you chose, and the test that would catch a
-                regression.
-              </p>
-              <a href="#roadmap">
-                Find your next build phase
-                <ArrowRight size={15} />
-              </a>
-            </aside>
-          </div>
-        )}
-        {tab === "decisions" && (
-          <div className="decisions-layout">
-            <div>
-              <div className="section-title">
-                <h2>Make the architectural call.</h2>
-                <p>
-                  These are proposed decisions. Your choices become your record.
-                </p>
-              </div>
-              {agent.decisions.map((decision, i) => {
-                const key = decisionKey(agent, i),
-                  item = progress.decisions[key];
-                return (
-                  <section className="panel decision-panel" key={key}>
-                    <span className="eyebrow">DECISION 0{i + 1}</span>
-                    <h3>{decision.question}</h3>
-                    <label htmlFor={`choice-${i}`}>Your choice</label>
-                    <select
-                      id={`choice-${i}`}
-                      value={item?.choice || ""}
-                      onChange={(e) =>
-                        setProgress((p) => ({
-                          ...p,
-                          decisions: {
-                            ...p.decisions,
-                            [key]: {
-                              ...(p.decisions[key] ?? {
-                                choice: "",
-                                rationale: "",
-                              }),
-                              choice: e.target.value,
-                            },
-                          },
-                        }))
-                      }
-                    >
-                      <option value="">Not decided yet</option>
-                      {decision.options.map((option) => (
-                        <option key={option}>{option}</option>
-                      ))}
-                    </select>
-                    <p className="recommendation">
-                      <Compass size={15} />
-                      <span>
-                        <strong>A starting recommendation:</strong>{" "}
-                        {decision.recommendation}
-                      </span>
-                    </p>
-                    <label htmlFor={`rationale-${i}`}>
-                      Why this trade-off?
-                    </label>
-                    <textarea
-                      id={`rationale-${i}`}
-                      rows={3}
-                      maxLength={20000}
-                      placeholder="What do you gain? What do you give up? What would change your mind?"
-                      value={item?.rationale || ""}
-                      onChange={(e) =>
-                        setProgress((p) => ({
-                          ...p,
-                          decisions: {
-                            ...p.decisions,
-                            [key]: {
-                              ...(p.decisions[key] ?? {
-                                choice: "",
-                                rationale: "",
-                              }),
-                              rationale: e.target.value,
-                            },
-                          },
-                        }))
-                      }
-                    />
-                  </section>
-                );
-              })}
+        );
+      })}
+    </div>
+  );
+}
+function Takeaways({
+  agent,
+  progress,
+  setProgress,
+}: {
+  agent: Archetype;
+  progress: Progress;
+  setProgress: ProgressSetter;
+}) {
+  const record = progress.takeaways[agent.id] || { text: "", reviewed: false };
+  return (
+    <section className="takeaway-editor">
+      <div className="section-caption">
+        <span>CORE TAKEAWAYS / PERSONAL RECORD</span>
+        <label className="check-label">
+          <input
+            type="checkbox"
+            checked={record.reviewed}
+            disabled={!record.text.trim()}
+            onChange={(e) =>
+              setProgress((p) => ({
+                ...p,
+                takeaways: {
+                  ...p.takeaways,
+                  [agent.id]: { ...record, reviewed: e.target.checked },
+                },
+              }))
+            }
+          />
+          Reviewed
+        </label>
+      </div>
+      <label className="sr-only" htmlFor={`takeaway-${agent.id}`}>
+        Core takeaways for {agent.shortName}
+      </label>
+      <textarea
+        id={`takeaway-${agent.id}`}
+        rows={3}
+        maxLength={20000}
+        placeholder="Record the invariant, implementation trade-off, or failure mode worth retaining…"
+        value={record.text}
+        onChange={(e) =>
+          setProgress((p) => ({
+            ...p,
+            takeaways: {
+              ...p.takeaways,
+              [agent.id]: {
+                text: e.target.value,
+                reviewed: record.reviewed && !!e.target.value.trim(),
+              },
+            },
+          }))
+        }
+      />
+      <small>
+        Editable and persistent. Review state is separate from implementation
+        verification.
+      </small>
+    </section>
+  );
+}
+function Decisions({
+  agent,
+  progress,
+  setProgress,
+  activeBlock,
+}: {
+  agent: Archetype;
+  progress: Progress;
+  setProgress: ProgressSetter;
+  activeBlock?: string;
+}) {
+  const context = engineeringSpecs[agent.id].blocks.find(
+    (b) => b.id === activeBlock,
+  );
+  return (
+    <div className="decisions-layout">
+      <div>
+        {context && (
+          <section className="linked-spec">
+            <div className="section-caption">
+              LINKED SPECIFICATION / {context.id.toUpperCase()}
             </div>
-            <aside className="panel recall-panel">
-              <BookOpen size={24} />
-              <span className="eyebrow">YOUR ENGINEERING RECALL</span>
-              <h3>A note to your future self.</h3>
-              <p>
-                Explain this archetype in your own words. Capture a failure you
-                saw, a question you still have, or a decision you would defend
-                in an interview.
-              </p>
-              <label className="sr-only" htmlFor="learning-note">
-                Learning reflection
+            <h2>{context.title}</h2>
+            <p>{context.decision}</p>
+            <p>
+              <strong>Trade-off:</strong> {context.tradeoff}
+            </p>
+            <a
+              className="inline-link"
+              href={routeFor(agent, "architecture", context.id)}
+            >
+              Return to specification
+              <ArrowUpRight size={12} />
+            </a>
+          </section>
+        )}
+        <div className="panel-heading">
+          <h2>Architectural decision records</h2>
+          <small>Proposed choices · explicit selection required</small>
+        </div>
+        {agent.decisions.map((decision, i) => {
+          const key = decisionKey(agent, i),
+            record = progress.decisions[key] || { choice: "", rationale: "" };
+          return (
+            <section className="decision-record" key={key}>
+              <div className="section-caption">
+                DECISION / {agent.id.toUpperCase()} / 0{i + 1}
+              </div>
+              <h3>{decision.question}</h3>
+              <label htmlFor={`choice-${agent.id}-${i}`}>
+                Selected approach
               </label>
-              <textarea
-                id="learning-note"
-                maxLength={50000}
-                rows={12}
-                placeholder="I used to think…\n\nThen I learned…\n\nThe failure mode I can now explain is…"
-                value={progress.notes[agent.id] || ""}
+              <select
+                id={`choice-${agent.id}-${i}`}
+                value={record.choice}
                 onChange={(e) =>
                   setProgress((p) => ({
                     ...p,
-                    notes: { ...p.notes, [agent.id]: e.target.value },
+                    decisions: {
+                      ...p.decisions,
+                      [key]: { ...record, choice: e.target.value },
+                    },
+                  }))
+                }
+              >
+                <option value="">Not decided yet</option>
+                {decision.options.map((option) => (
+                  <option key={option}>{option}</option>
+                ))}
+              </select>
+              <p className="proposed-note">{decision.recommendation}</p>
+              <label htmlFor={`rationale-${agent.id}-${i}`}>
+                Rationale / rejected alternatives / revisit trigger
+              </label>
+              <textarea
+                id={`rationale-${agent.id}-${i}`}
+                rows={3}
+                maxLength={20000}
+                value={record.rationale}
+                placeholder="Record the reason and practical consequence…"
+                onChange={(e) =>
+                  setProgress((p) => ({
+                    ...p,
+                    decisions: {
+                      ...p.decisions,
+                      [key]: { ...record, rationale: e.target.value },
+                    },
                   }))
                 }
               />
-              <small>
-                Autosaved on this device. Include in your next backup.
-              </small>
-            </aside>
-          </div>
-        )}
-      </section>
-      <div className="detail-pagination">
-        {archetypes.map(
-          (a, i) =>
-            a.id === agent.id && (
-              <div key={a.id}>
-                {i > 0 ? (
-                  <a href={`#agent/${archetypes[i - 1].id}`}>
-                    <ArrowLeft size={16} />
-                    <span>
-                      <small>PREVIOUS ARCHETYPE</small>
-                      {archetypes[i - 1].name}
-                    </span>
-                  </a>
-                ) : (
-                  <span />
-                )}
-                {i < archetypes.length - 1 ? (
-                  <a href={`#agent/${archetypes[i + 1].id}`}>
-                    <span>
-                      <small>NEXT ARCHETYPE</small>
-                      {archetypes[i + 1].name}
-                    </span>
-                    <ArrowRight size={16} />
-                  </a>
-                ) : (
-                  <a href="#roadmap">
-                    Follow the build roadmap
-                    <ArrowRight size={16} />
-                  </a>
-                )}
-              </div>
-            ),
-        )}
-      </div>
-    </>
-  );
-}
-
-function SystemMap({ progress }: { progress: Progress }) {
-  const [active, setActive] = useState("orchestrator");
-  const agent = archetypes.find((a) => a.id === active)!;
-  return (
-    <>
-      <PageHeading
-        label="01 / TOPOLOGY & COLLABORATION"
-        title="A crew, with clear boundaries."
-      >
-        Follow one objective through the system. Select a role to inspect its
-        responsibility.
-      </PageHeading>
-      <div className="system-layout">
-        <section className="panel system-canvas">
-          <div className="canvas-title">
-            <span className="eyebrow">THE BOX / CONCEPTUAL ARCHITECTURE</span>
-            <span className="subtle-tag">
-              <span className="live-dot" />
-              Design reference
-            </span>
-          </div>
-          <div className="objective-node">
-            <Box size={18} />
-            <span>Workspace + objective</span>
-          </div>
-          <div className="connector-label">ready event ↓</div>
-          <div className="map-row single">{node("orchestrator")}</div>
-          <div className="map-connectors">
-            <span>gather evidence ↓</span>
-            <span>delegate work ↓</span>
-          </div>
-          <div className="map-row pair">
-            {node("scout")}
-            {node("builder")}
-          </div>
-          <div className="map-connectors">
-            <span>immutable evidence →</span>
-            <span>staged patch ↓</span>
-          </div>
-          <div className="map-row single">{node("critic")}</div>
-          <div className="map-connectors">
-            <span>reject → bounded repair</span>
-            <span>approve ↓ promote</span>
-          </div>
-          <div className="map-row pair">
-            {node("sentinel")}
-            {node("curator")}
-          </div>
-          <div className="map-caption">
-            <Radio size={15} />
-            Sentinel observes the whole workspace. Curator runs after
-            termination.
-          </div>
-          <div className="ledger-strip">
-            <Layers3 size={17} />
-            <span>Append-only execution ledger</span>
-            <small>Events + artifact references</small>
-          </div>
-        </section>
-        <aside className={`panel map-inspector ${agent.color}`}>
-          <RoleIcon agent={agent} size={28} />
-          <span className="eyebrow">SELECTED ROLE</span>
-          <h2>{agent.name}</h2>
-          <p>{agent.purpose}</p>
-          <dl>
-            <dt>Runtime</dt>
-            <dd>{agent.runtime}</dd>
-            <dt>State boundary</dt>
-            <dd>{agent.stateOwnership[0]}</dd>
-            <dt>Stopping rule</dt>
-            <dd>{agent.loopBound}</dd>
-          </dl>
-          <StatusBadge status={statusOf(agent, progress)} />
-          <a className="button primary" href={`#agent/${agent.id}`}>
-            Inspect archetype
-            <ArrowUpRight size={15} />
-          </a>
-        </aside>
-      </div>
-      <div className="principle-banner">
-        <ShieldCheck size={23} />
-        <div>
-          <strong>Coordination does not imply shared mutation.</strong>
-          <p>
-            Only the Orchestrator owns the task graph. Specialists exchange
-            immutable, typed artifacts.
-          </p>
-        </div>
-      </div>
-    </>
-  );
-  function node(id: string) {
-    const a = archetypes.find((x) => x.id === id)!;
-    return (
-      <button
-        className={`map-node ${a.color} ${active === id ? "selected" : ""}`}
-        onClick={() => setActive(id)}
-        aria-pressed={active === id}
-      >
-        <RoleIcon agent={a} size={20} />
-        <span>
-          <strong>{a.shortName}</strong>
-          <small>{a.tag}</small>
-        </span>
-        <ChevronRight size={14} />
-      </button>
-    );
-  }
-}
-
-function Roadmap({ progress }: { progress: Progress }) {
-  return (
-    <>
-      <PageHeading
-        label="02 / PROGRESSIVE IMPLEMENTATION"
-        title="Build one guarantee at a time."
-      >
-        A four-phase path from a bounded worker to a coordinated, observable
-        agent system.
-      </PageHeading>
-      <div className="roadmap-note">
-        <Compass size={19} />
-        <span>
-          This is a suggested build sequence. Milestones reflect your saved
-          evidence; scaffolded code is not automatically marked complete.
-        </span>
-      </div>
-      <div className="roadmap-list">
-        {phases.map((phase, i) => {
-          const agents = archetypes.filter((a) => phase.agents.includes(a.id));
-          const done = agents.reduce((n, a) => n + completion(a, progress), 0),
-            total = agents.reduce((n, a) => n + a.milestones.length, 0);
-          return (
-            <section className="roadmap-phase" key={phase.title}>
-              <div className="phase-marker">
-                <span>0{i + 1}</span>
-              </div>
-              <div className="panel phase-content">
-                <div className="panel-title">
-                  <span className="eyebrow">PHASE 0{i + 1}</span>
-                  <span className="subtle-tag">
-                    {done} / {total} milestones
-                  </span>
-                </div>
-                <h2>{phase.title}</h2>
-                <h3>{phase.subtitle}</h3>
-                <p>{phase.description}</p>
-                <ProgressBar value={done} total={total} />
-                <div className="phase-agents">
-                  {agents.map((a) => (
-                    <a key={a.id} href={`#agent/${a.id}`}>
-                      <RoleIcon agent={a} size={18} />
-                      <span>{a.name}</span>
-                      <StatusBadge status={statusOf(a, progress)} />
-                      <ArrowUpRight size={15} />
-                    </a>
-                  ))}
-                </div>
-              </div>
             </section>
           );
         })}
       </div>
-      <section className="repo-boundary">
-        <Box size={24} />
-        <div>
-          <span className="eyebrow">TWO PROJECTS. A CLEAR BOUNDARY.</span>
-          <h3>Learn here. Engineer in agentbox-core.</h3>
-          <p>
-            This app stores your understanding and evidence. The standalone
-            engine owns runtime code, workspaces, and execution logs.
-          </p>
-          <div>
-            <code>agent-architect/</code>
-            <span>↔ decisions & evidence ↔</span>
-            <code>agentbox-core/</code>
-          </div>
+      <aside className="notes-column">
+        <section className="architectural-notes">
+          <div className="section-caption">ARCHITECTURAL NOTES</div>
+          <label htmlFor={`notes-${agent.id}`}>
+            Implementation observations
+          </label>
+          <textarea
+            id={`notes-${agent.id}`}
+            rows={10}
+            maxLength={50000}
+            placeholder="Module changes, edge cases, constraints, unresolved questions…"
+            value={progress.notes[agent.id] || ""}
+            onChange={(e) =>
+              setProgress((p) => ({
+                ...p,
+                notes: { ...p.notes, [agent.id]: e.target.value },
+              }))
+            }
+          />
+          <small>Original learning reflections are retained here.</small>
+        </section>
+        <Takeaways
+          agent={agent}
+          progress={progress}
+          setProgress={setProgress}
+        />
+        <div className="recall-block-links">
+          <span className="section-caption">SPECIFICATION REFERENCES</span>
+          {engineeringSpecs[agent.id].blocks.map((b, i) => (
+            <a key={b.id} href={routeFor(agent, "architecture", b.id)}>
+              <code>0{i + 1}</code>
+              {b.title}
+              <ArrowUpRight size={11} />
+            </a>
+          ))}
         </div>
-      </section>
+      </aside>
+    </div>
+  );
+}
+function SystemMap({ progress }: { progress: Progress }) {
+  const [selectedId, setSelectedId] = useState<Archetype["id"]>("orchestrator");
+  const agent = archetypes.find((a) => a.id === selectedId)!;
+  const inspector = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    inspector.current?.scrollTo(0, 0);
+  }, [selectedId]);
+  const node = (id: Archetype["id"]) => {
+    const a = archetypes.find((item) => item.id === id)!;
+    return (
+      <button
+        className={`map-node ${selectedId === id ? "selected" : ""}`}
+        aria-pressed={selectedId === id}
+        key={id}
+        onClick={() => setSelectedId(id)}
+      >
+        <RoleIcon agent={a} />
+        <span>
+          <strong>{a.shortName}</strong>
+          <code>{a.id}</code>
+        </span>
+        <ChevronRight size={12} />
+      </button>
+    );
+  };
+  return (
+    <>
+      <DocumentHeader
+        section="TOPOLOGY // SUPERVISOR + BOUNDED SUBGRAPHS"
+        title="System map"
+        path="agentbox-core/src/agents/ · target collaboration graph"
+      >
+        <span className="document-badge">CONCEPTUAL SPEC / v0.2</span>
+      </DocumentHeader>
+      <SpecProperties agent={agent} progress={progress} />
+      <div className="map-layout">
+        <section className="topology-pane" aria-label="Agent topology">
+          <div className="section-caption">
+            SELECT A NODE / INSPECT SPECIFICATION
+          </div>
+          <div className="objective-node">
+            <Box size={14} />
+            <code>Box + objective + budget</code>
+          </div>
+          <div className="map-edge">WorkspaceReady ↓</div>
+          {node("orchestrator")}
+          <div className="map-edge">TaskLease / read capability ↓</div>
+          <div className="node-pair">
+            {node("scout")}
+            {node("builder")}
+          </div>
+          <div className="map-edge">
+            EvidenceBundle → Builder → StagedPatch ↓
+          </div>
+          {node("critic")}
+          <div className="map-edge">
+            REJECTED ↺ bounded repair · APPROVED → promote
+          </div>
+          <div className="observer-rail">
+            <span>DECOUPLED EVENT / POST-RUN PROCESSES</span>
+            {node("sentinel")}
+            {node("curator")}
+          </div>
+          <div className="ledger-node">
+            <code>Append-only execution ledger</code>
+            <small>Immutable events + typed artifact references</small>
+          </div>
+          <div className="map-legend">
+            <p>
+              <span className="legend-square" />
+              Single task-graph writer: Orchestrator
+            </p>
+            <p>
+              <span className="legend-square outline" />
+              Worker capability scope is role-specific
+            </p>
+            <p>
+              Graph is a target design. Six production agents are not yet
+              implemented.
+            </p>
+          </div>
+        </section>
+        <div
+          className="map-spec-pane"
+          ref={inspector}
+          role="region"
+          aria-label={`${agent.shortName} technical specification`}
+        >
+          <div className="map-spec-heading">
+            <RoleIcon agent={agent} />
+            <div>
+              <span className="section-caption">
+                TECHNICAL SPECIFICATION / 9 BLOCKS
+              </span>
+              <h2>{agent.name}</h2>
+            </div>
+            <a className="button" href={`#agent/${agent.id}`}>
+              Open document
+              <ArrowUpRight size={12} />
+            </a>
+          </div>
+          <EngineeringSheet key={agent.id} agent={agent} compact />
+        </div>
+      </div>
     </>
   );
 }
