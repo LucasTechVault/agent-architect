@@ -1,20 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { archetypes } from "./data/archetypes";
+import { roadmapIssues } from "./data/roadmap";
 import {
   completion,
   decisionKey,
   emptyProgress,
+  issueStatusOf,
   milestoneKey,
   parseProgress,
   statusOf,
+  STORAGE_KEY,
 } from "./progress";
 
 const agent = archetypes[0];
 const milestone = milestoneKey(agent, agent.milestones[0].id);
 const decision = decisionKey(agent, 0);
+const issueId = roadmapIssues[0].id;
 
 describe("progress backups", () => {
-  it("round-trips evidence, an explicit decision, and a learning reflection", () => {
+  it("round-trips v2 evidence, decisions, reflections, issues, and takeaways", () => {
     const progress = emptyProgress();
     progress.milestones[milestone] = {
       complete: true,
@@ -26,10 +30,64 @@ describe("progress backups", () => {
     };
     progress.notes[agent.id] =
       "A supervisor coordinates; it does not patch source files.";
+    progress.issues[issueId] = {
+      complete: true,
+      evidence: "Commit def456: deterministic termination fixture passes.",
+      note: "The stop reason is persisted before returning.",
+    };
+    progress.takeaways[agent.id] = {
+      text: "One logical writer makes task-state transitions easier to replay.",
+      reviewed: true,
+    };
 
     expect(parseProgress(JSON.parse(JSON.stringify(progress)))).toEqual(
       progress,
     );
+  });
+
+  it("migrates v1 without losing existing records and keeps the storage slot", () => {
+    const legacy = {
+      version: 1,
+      milestones: {
+        [milestone]: { complete: true, evidence: "Original test output." },
+      },
+      decisions: {
+        [decision]: { choice: "", rationale: "An unresolved trade-off." },
+      },
+      notes: { [agent.id]: "Original architecture reflection." },
+    };
+
+    expect(parseProgress(JSON.parse(JSON.stringify(legacy)))).toEqual({
+      ...legacy,
+      version: 2,
+      issues: {},
+      takeaways: {},
+    });
+    expect(STORAGE_KEY).toBe("agent-architect.progress.v1");
+  });
+
+  it("keeps imported issue and takeaway edits separate from the original backup", () => {
+    const backup = emptyProgress();
+    backup.issues[issueId] = {
+      complete: false,
+      evidence: "Draft test output.",
+      note: "Initial attempt.",
+    };
+    backup.takeaways[agent.id] = { text: "Initial lesson.", reviewed: true };
+    const edited = parseProgress(backup);
+
+    edited.issues[issueId].note = "Revised after testing recovery.";
+    edited.takeaways[agent.id] = {
+      text: "A more precise lesson.",
+      reviewed: false,
+    };
+
+    expect(backup.issues[issueId].note).toBe("Initial attempt.");
+    expect(backup.takeaways[agent.id]).toEqual({
+      text: "Initial lesson.",
+      reviewed: true,
+    });
+    expect(parseProgress(JSON.parse(JSON.stringify(edited)))).toEqual(edited);
   });
 
   it("keeps a rationale without silently choosing an architecture option", () => {
@@ -57,6 +115,8 @@ describe("progress backups", () => {
       },
       decisions: { "future-agent:0": null },
       notes: { "future-agent": { arbitrary: true } },
+      issues: { "future-issue": null },
+      takeaways: { "future-agent": { arbitrary: true } },
       unrelated: "not persisted",
     });
 
@@ -72,11 +132,15 @@ describe("progress backups", () => {
     null,
     "not an object",
     {},
-    { ...emptyProgress(), version: 2 },
+    { ...emptyProgress(), version: 3 },
     { version: 1, milestones: {}, decisions: {} },
     { ...emptyProgress(), milestones: [] },
     { ...emptyProgress(), decisions: [] },
     { ...emptyProgress(), notes: [] },
+    { ...emptyProgress(), issues: [] },
+    { ...emptyProgress(), takeaways: [] },
+    { ...emptyProgress(), issues: undefined },
+    { ...emptyProgress(), takeaways: undefined },
   ])("rejects an incompatible or malformed backup: %j", (value) => {
     expect(() => parseProgress(value)).toThrow();
   });
@@ -174,5 +238,77 @@ describe("archetype status", () => {
 
     progress.milestones[milestone].complete = false;
     expect(statusOf(agent, progress)).toBe("In Progress");
+  });
+
+  it.each([
+    null,
+    { complete: "yes", evidence: "a test", note: "" },
+    { complete: true, evidence: false, note: "" },
+    { complete: false, evidence: "", note: null },
+    { complete: true, evidence: "x".repeat(20001), note: "" },
+    { complete: false, evidence: "", note: "x".repeat(20001) },
+  ])("rejects malformed known issue data", (value) => {
+    expect(() =>
+      parseProgress({ ...emptyProgress(), issues: { [issueId]: value } }),
+    ).toThrow();
+  });
+
+  it.each([
+    null,
+    { text: false, reviewed: false },
+    { text: "A lesson", reviewed: "yes" },
+    { text: "x".repeat(20001), reviewed: true },
+  ])("rejects malformed known takeaways", (value) => {
+    expect(() =>
+      parseProgress({ ...emptyProgress(), takeaways: { [agent.id]: value } }),
+    ).toThrow();
+  });
+
+  it("removes issue completion and takeaway review claims without supporting text", () => {
+    const progress = parseProgress({
+      ...emptyProgress(),
+      issues: {
+        [issueId]: {
+          complete: true,
+          evidence: " \n\t ",
+          note: "Implementation draft.",
+        },
+      },
+      takeaways: { [agent.id]: { text: " \n\t ", reviewed: true } },
+    });
+
+    expect(progress.issues[issueId]).toEqual({
+      complete: false,
+      evidence: " \n\t ",
+      note: "Implementation draft.",
+    });
+    expect(progress.takeaways[agent.id]).toEqual({
+      text: " \n\t ",
+      reviewed: false,
+    });
+    expect(issueStatusOf(issueId, progress)).toBe("In Progress");
+  });
+});
+
+describe("roadmap issue status", () => {
+  it("tracks independent issue work without inferring archetype implementation", () => {
+    const progress = emptyProgress();
+    expect(issueStatusOf(issueId, progress)).toBe("Not Started");
+
+    progress.issues[issueId] = {
+      complete: false,
+      evidence: "",
+      note: "A recovery edge case remains.",
+    };
+    expect(issueStatusOf(issueId, progress)).toBe("In Progress");
+
+    progress.issues[issueId] = {
+      complete: true,
+      evidence: "Recovery regression passes.",
+      note: "",
+    };
+    expect(issueStatusOf(issueId, progress)).toBe("Verified");
+    expect(issueStatusOf(roadmapIssues[1].id, progress)).toBe("Not Started");
+    expect(statusOf(agent, progress)).toBe("Not Started");
   });
 });
