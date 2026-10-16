@@ -223,7 +223,10 @@ export default function App() {
           onClick={() => setMobileOpen(false)}
         />
       )}
-      <aside className={`sidebar ${mobileOpen ? "mobile-open" : ""}`}>
+      <aside
+        id="sidebar-navigation"
+        className={`sidebar ${mobileOpen ? "mobile-open" : ""}`}
+      >
         <a
           className="brand"
           href="#archetypes"
@@ -303,6 +306,8 @@ export default function App() {
             <button
               className="icon-button mobile-toggle"
               aria-label="Open navigation"
+              aria-expanded={mobileOpen}
+              aria-controls="sidebar-navigation"
               onClick={() => setMobileOpen(true)}
             >
               <Menu size={20} />
@@ -321,7 +326,11 @@ export default function App() {
               <span />
               {storageError ? "Backup needed" : "Saved on this device"}
             </span>
-            <button className="button quiet compact" onClick={exportProgress}>
+            <button
+              className="button quiet compact"
+              aria-label="Export progress"
+              onClick={exportProgress}
+            >
               <Download size={15} />
               <span>Export progress</span>
             </button>

@@ -22,3 +22,5 @@ Verified is a learner's recorded claim, not an engine-generated receipt. Data is
 - [`src/progress.ts`](../../src/progress.ts): schema validation, evidence gating, and status aggregation.
 - [`src/App.tsx`](../../src/App.tsx): autosave, explicit choices, evidence editing, and backup confirmation.
 - [`src/progress.test.ts`](../../src/progress.test.ts): round-trip preservation, malformed input rejection, unknown-key filtering, blank choices, evidence gating, and status isolation. Run `npm test`.
+
+Initial validation: 26 tests and production build pass. Browser checks cover evidence gating, reload persistence, explicit undecided choices, backup export/restore, navigation/filtering, and a 390px mobile layout. Test progress was cleared.

@@ -2242,11 +2242,13 @@ textarea::placeholder {
   }
   .sidebar {
     width: 240px;
+    visibility: hidden;
     transform: translateX(-100%);
     transition: transform 0.2s;
     z-index: 80;
   }
   .sidebar.mobile-open {
+    visibility: visible;
     transform: translateX(0);
   }
   .sidebar-scrim {
