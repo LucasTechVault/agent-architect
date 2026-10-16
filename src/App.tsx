@@ -231,6 +231,7 @@ export default function App() {
           className="brand"
           href="#archetypes"
           aria-label="Agent Architect home"
+          onClick={() => setMobileOpen(false)}
         >
           <span className="brand-symbol">
             <Box size={25} strokeWidth={1.6} />
@@ -253,6 +254,7 @@ export default function App() {
             <a
               key={id}
               href={`#${id}`}
+              onClick={() => setMobileOpen(false)}
               className={
                 (selected ? id === "archetypes" : route === id) ? "active" : ""
               }

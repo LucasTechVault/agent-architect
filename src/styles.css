@@ -2254,7 +2254,7 @@ textarea::placeholder {
   .sidebar-scrim {
     display: block;
     position: fixed;
-    inset: 0;
+    inset: 0 0 0 240px;
     background: #101a3655;
     z-index: 70;
     backdrop-filter: blur(2px);
