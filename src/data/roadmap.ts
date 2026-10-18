@@ -1,8 +1,16 @@
-import type { ArchetypeId } from "./archetypes";
+import type {
+  ArchetypeId,
+  ControlTopology,
+  CurriculumMilestone,
+  ExecutionRuntime,
+} from "./archetypes";
 
 export interface RoadmapIssue {
   id: string;
   title: string;
+  milestone: CurriculumMilestone;
+  topology: ControlTopology;
+  runtime: ExecutionRuntime;
   components: string[];
   requirements: string[];
   pitfalls: string[];
@@ -23,12 +31,15 @@ export const roadmapPhases: RoadmapPhase[] = [
   {
     id: 1,
     title: "One bounded run",
-    subtitle: "Build the Box + single-worker kernel",
+    subtitle: "Build the M0 Box + M2 ReAct single-worker kernel",
     agents: ["builder"],
     issues: [
       {
         id: "CORE-101",
         title: "Fence Box paths and copy mounted inputs",
+        milestone: "M0",
+        topology: "Deterministic Workflow",
+        runtime: "Event-Driven / Append-Only Ledger",
         components: [
           "agentbox-core/src/workspace/box-manager.ts",
           "agentbox-core/tests/box-manager.test.ts",
@@ -50,6 +61,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-102",
         title: "Enforce step, token and deadline admission",
+        milestone: "M0",
+        topology: "Autonomous Agent",
+        runtime: "ReAct Loop",
         components: [
           "agentbox-core/src/runtime/budget.ts",
           "agentbox-core/src/runtime/runner.ts",
@@ -72,6 +86,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-103",
         title: "Persist ordered execution events with one writer",
+        milestone: "M0",
+        topology: "Deterministic Workflow",
+        runtime: "Event-Driven / Append-Only Ledger",
         components: [
           "agentbox-core/src/ledger/event-log.ts",
           "agentbox-core/tests/event-log.test.ts",
@@ -93,6 +110,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-104",
         title: "Give the Builder a scoped staging transaction",
+        milestone: "M2",
+        topology: "Autonomous Agent",
+        runtime: "ReAct Loop",
         components: [
           "agentbox-core/src/agents/builder.ts (planned)",
           "agentbox-core/src/workspace/staging-transaction.ts (planned)",
@@ -115,6 +135,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-105",
         title: "Add a model gateway and bounded context assembly",
+        milestone: "M2",
+        topology: "Autonomous Agent",
+        runtime: "ReAct Loop",
         components: [
           "agentbox-core/src/gateway/model-router.ts (planned)",
           "agentbox-core/src/context/builder-context.ts (planned)",
@@ -139,12 +162,15 @@ export const roadmapPhases: RoadmapPhase[] = [
   {
     id: 2,
     title: "Earn the right to merge",
-    subtitle: "Add the Builder ↔ Critic dyad",
+    subtitle: "Add the M2/M3 Builder ↔ Critic workflow & repair cycle",
     agents: ["critic"],
     issues: [
       {
         id: "CORE-201",
         title: "Validate staged patch identity and scope",
+        milestone: "M2",
+        topology: "Deterministic Workflow",
+        runtime: "A2A Protocol",
         components: [
           "agentbox-core/src/workspace/staging-transaction.ts (planned)",
           "agentbox-core/src/contracts/staged-patch.ts (planned)",
@@ -166,6 +192,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-202",
         title: "Run deterministic checks inside a bounded executor",
+        milestone: "M2",
+        topology: "Deterministic Workflow",
+        runtime: "ReAct Loop",
         components: [
           "agentbox-core/src/tools/command-runner.ts (planned)",
           "agentbox-core/src/tools/process-supervisor.ts (planned)",
@@ -188,6 +217,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-203",
         title: "Route the Critic through tests and a structured judge",
+        milestone: "M2",
+        topology: "Deterministic Workflow",
+        runtime: "A2A Protocol",
         components: [
           "agentbox-core/src/agents/critic-verifier.ts (planned)",
           "agentbox-core/src/contracts/verification-receipt.ts (planned)",
@@ -210,6 +242,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-204",
         title: "Promote an approved candidate atomically",
+        milestone: "M4",
+        topology: "Deterministic Workflow",
+        runtime: "A2A Protocol",
         components: [
           "agentbox-core/src/workspace/promote.ts (planned)",
           "agentbox-core/src/contracts/verification-receipt.ts (planned)",
@@ -232,6 +267,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-205",
         title: "Bound the Builder–Critic repair cycle",
+        milestone: "M3",
+        topology: "Deterministic Workflow",
+        runtime: "Graph / State-Machine",
         components: [
           "agentbox-core/src/runtime/repair-cycle.ts (planned)",
           "agentbox-core/src/runtime/budget.ts",
@@ -256,12 +294,15 @@ export const roadmapPhases: RoadmapPhase[] = [
   {
     id: 3,
     title: "Coordinate with intent",
-    subtitle: "Add orchestration + parallel recon",
+    subtitle: "Add M3 Graph orchestration + M4 A2A parallel recon",
     agents: ["orchestrator", "scout"],
     issues: [
       {
         id: "CORE-301",
         title: "Make the task graph a validated state machine",
+        milestone: "M3",
+        topology: "Deterministic Workflow",
+        runtime: "Graph / State-Machine",
         components: [
           "agentbox-core/src/orchestration/task-graph.ts (planned)",
           "agentbox-core/src/agents/orchestrator.ts (planned)",
@@ -284,6 +325,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-302",
         title: "Lease tasks with shared resource reservations",
+        milestone: "M4",
+        topology: "Deterministic Workflow",
+        runtime: "A2A Protocol",
         components: [
           "agentbox-core/src/contracts/task-lease.ts (planned)",
           "agentbox-core/src/orchestration/dispatcher.ts (planned)",
@@ -306,6 +350,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-303",
         title: "Implement a strictly read-only Recon tool surface",
+        milestone: "M2",
+        topology: "Autonomous Agent",
+        runtime: "ReAct Loop",
         components: [
           "agentbox-core/src/agents/recon-scout.ts (planned)",
           "agentbox-core/src/tools/repository-search.ts (planned)",
@@ -328,6 +375,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-304",
         title: "Create immutable, revision-bound evidence bundles",
+        milestone: "M4",
+        topology: "Autonomous Agent",
+        runtime: "A2A Protocol",
         components: [
           "agentbox-core/src/contracts/evidence-bundle.ts (planned)",
           "agentbox-core/src/context/source-slice.ts (planned)",
@@ -350,6 +400,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-305",
         title: "Fan out Recon and reconcile before mutation",
+        milestone: "M4",
+        topology: "Deterministic Workflow",
+        runtime: "A2A Protocol",
         components: [
           "agentbox-core/src/orchestration/fanout.ts (planned)",
           "agentbox-core/src/orchestration/reconciler.ts (planned)",
@@ -374,12 +427,15 @@ export const roadmapPhases: RoadmapPhase[] = [
   {
     id: 4,
     title: "React, then remember",
-    subtitle: "Add the Sentinel + Memory Curator",
+    subtitle: "Add M1 Event-Driven Sentinel + M5 Curator & Eval Gate",
     agents: ["sentinel", "curator"],
     issues: [
       {
         id: "CORE-401",
         title: "Route typed lifecycle events without model polling",
+        milestone: "M1",
+        topology: "Deterministic Workflow",
+        runtime: "Event-Driven / Append-Only Ledger",
         components: [
           "agentbox-core/src/agents/box-sentinel.ts (planned)",
           "agentbox-core/src/contracts/sentinel-alert.ts (planned)",
@@ -402,6 +458,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-402",
         title: "Reconcile watchers across restarts and missed events",
+        milestone: "M1",
+        topology: "Deterministic Workflow",
+        runtime: "Event-Driven / Append-Only Ledger",
         components: [
           "agentbox-core/src/observability/filesystem-watcher.ts (planned)",
           "agentbox-core/src/observability/reconciler.ts (planned)",
@@ -424,6 +483,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-403",
         title: "Define scoped, provenance-bound memory entries",
+        milestone: "M5",
+        topology: "Deterministic Workflow",
+        runtime: "Event-Driven / Append-Only Ledger",
         components: [
           "agentbox-core/src/contracts/curated-memory-entry.ts (planned)",
           "agentbox-core/src/memory/entry-store.ts (planned)",
@@ -446,6 +508,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-404",
         title: "Run idempotent post-run curation with redaction gates",
+        milestone: "M5",
+        topology: "Deterministic Workflow",
+        runtime: "Event-Driven / Append-Only Ledger",
         components: [
           "agentbox-core/src/agents/memory-curator.ts (planned)",
           "agentbox-core/src/memory/job-store.ts (planned)",
@@ -468,6 +533,9 @@ export const roadmapPhases: RoadmapPhase[] = [
       {
         id: "CORE-405",
         title: "Evaluate the crew with trace-linked benchmark Boxes",
+        milestone: "M5",
+        topology: "Deterministic Workflow",
+        runtime: "A2A Protocol",
         components: [
           "agentbox-core/src/evaluation/box-suite.ts (planned)",
           "agentbox-core/src/observability/metrics.ts (planned)",

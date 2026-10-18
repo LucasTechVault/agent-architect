@@ -138,7 +138,7 @@ const receiptSchema = `interface VerificationReceipt {
 export const engineeringSpecs: Record<ArchetypeId, EngineeringSpec> = {
   orchestrator: {
     modulePath: planned("agents/orchestrator.ts"),
-    runtimePattern: "Deterministic state machine · supervisor / worker",
+    runtimePattern: "Deterministic Workflow · Graph / State-Machine & A2A Protocol (M3/M4)",
     stateMutability:
       "Single logical writer to TaskGraph; immutable worker artifacts",
     tokenBudgetTier:
@@ -349,7 +349,7 @@ export const engineeringSpecs: Record<ArchetypeId, EngineeringSpec> = {
   scout: {
     modulePath: planned("agents/recon-scout.ts"),
     runtimePattern:
-      "Bounded discovery loop · parallel fan-out / immutable fan-in",
+      "Autonomous Agent · ReAct Loop & A2A EvidenceBundle (M2/M4)",
     stateMutability:
       "Ephemeral scratchpad; read-only snapshot; immutable EvidenceBundle",
     tokenBudgetTier:
@@ -559,7 +559,7 @@ export const engineeringSpecs: Record<ArchetypeId, EngineeringSpec> = {
   },
   builder: {
     modulePath: `${core}runtime/runner.ts · ${planned("agents/builder.ts")}`,
-    runtimePattern: "Iterative ReAct loop · staged patch transaction",
+    runtimePattern: "Autonomous Agent · ReAct Loop & Staged Patch Transaction (M2)",
     stateMutability:
       "Scoped shadow workspace only; frozen candidate on submission",
     tokenBudgetTier: "Tier 2 tool-capable coding · 32,000 proposed tokens/task",
@@ -774,7 +774,7 @@ export const engineeringSpecs: Record<ArchetypeId, EngineeringSpec> = {
   critic: {
     modulePath: planned("agents/critic-verifier.ts"),
     runtimePattern:
-      "Code-routed pipeline · deterministic harness → structured judge",
+      "Deterministic Workflow · A2A VerificationReceipt Gate (M2/M5)",
     stateMutability:
       "Frozen candidate + immutable VerificationReceipt; no source edits",
     tokenBudgetTier:
@@ -984,7 +984,7 @@ export const engineeringSpecs: Record<ArchetypeId, EngineeringSpec> = {
   sentinel: {
     modulePath: planned("agents/box-sentinel.ts"),
     runtimePattern:
-      "Event-driven actor · subscribe / sleep / coalesce / signal",
+      "Deterministic Workflow · Event-Driven / Append-Only Ledger (M1)",
     stateMutability:
       "Bounded observer cursor + deduplication cache; no task/source writes",
     tokenBudgetTier:
@@ -1190,7 +1190,7 @@ export const engineeringSpecs: Record<ArchetypeId, EngineeringSpec> = {
   },
   curator: {
     modulePath: planned("agents/memory-curator.ts"),
-    runtimePattern: "Async batch pipeline · distill / validate / publish",
+    runtimePattern: "Deterministic Workflow · Event-Driven Ledger Curation (M1/M5)",
     stateMutability:
       "Versioned memory candidates; scoped publication; immutable run provenance",
     tokenBudgetTier:

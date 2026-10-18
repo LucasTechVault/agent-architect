@@ -1,6 +1,14 @@
 export type ArchetypeId =
   "orchestrator" | "scout" | "builder" | "critic" | "sentinel" | "curator";
 
+export type ControlTopology = "Deterministic Workflow" | "Autonomous Agent";
+export type ExecutionRuntime =
+  | "Event-Driven / Append-Only Ledger"
+  | "ReAct Loop"
+  | "Graph / State-Machine"
+  | "A2A Protocol";
+export type CurriculumMilestone = "M0" | "M1" | "M2" | "M3" | "M4" | "M5";
+
 /** Suggested learning/build order, not an implementation status. */
 export type BuildStage = 1 | 2 | 3 | 4;
 export type ArchetypeColor =
@@ -31,6 +39,9 @@ export interface Archetype {
   shortName: string;
   role: string;
   tag: string;
+  controlTopology: ControlTopology;
+  executionRuntime: ExecutionRuntime;
+  curriculumMilestone: CurriculumMilestone;
   runtime: string;
   topology: string;
   color: ArchetypeColor;
@@ -62,8 +73,11 @@ export const archetypes: Archetype[] = [
     shortName: "Orchestrator",
     role: "Turns an objective into bounded, coordinated work.",
     tag: "Supervisor",
-    runtime: "Deterministic State Machine",
-    topology: "Supervisor → scoped workers → verification gate",
+    controlTopology: "Deterministic Workflow",
+    executionRuntime: "Graph / State-Machine",
+    curriculumMilestone: "M3",
+    runtime: "Graph / State-Machine · A2A Protocol (M3/M4)",
+    topology: "Deterministic Workflow: Supervisor state machine → A2A TaskLease workers → verification gate",
     color: "violet",
     stage: 3,
     summary: "Own the plan. Route the work. Decide when the run is done.",
@@ -194,8 +208,11 @@ export const archetypes: Archetype[] = [
     shortName: "Recon Scout",
     role: "Gather focused evidence without changing the workspace.",
     tag: "Read-Only Scout",
-    runtime: "Bounded Loop",
-    topology: "Parallel fan-out → immutable evidence fan-in",
+    controlTopology: "Autonomous Agent",
+    executionRuntime: "ReAct Loop",
+    curriculumMilestone: "M2",
+    runtime: "ReAct Loop · A2A Evidence Handoff (M2/M4)",
+    topology: "Autonomous Agent: Bounded ReAct discovery → A2A EvidenceBundle fan-in",
     color: "blue",
     stage: 3,
     summary: "Search broadly, cite precisely, hand back evidence.",
@@ -313,8 +330,11 @@ export const archetypes: Archetype[] = [
     shortName: "Builder",
     role: "Turn a scoped task and evidence into a verifiable candidate change.",
     tag: "ReAct Worker",
-    runtime: "Iterative ReAct Tool Loop",
-    topology: "Scoped worker → isolated staging → verifier",
+    controlTopology: "Autonomous Agent",
+    executionRuntime: "ReAct Loop",
+    curriculumMilestone: "M2",
+    runtime: "ReAct Loop · Staged Transaction (M2)",
+    topology: "Autonomous Agent: Iterative ReAct tool loop → A2A StagedPatch → verifier",
     color: "amber",
     stage: 1,
     summary: "Reason, patch, run checks, and submit a candidate.",
@@ -445,8 +465,11 @@ export const archetypes: Archetype[] = [
     shortName: "Critic & Verifier",
     role: "Judge a frozen candidate against explicit acceptance criteria.",
     tag: "Adversarial Gatekeeper",
-    runtime: "Code-Routed Verification Pipeline",
-    topology: "Deterministic test harness → structured LLM judge → receipt",
+    controlTopology: "Deterministic Workflow",
+    executionRuntime: "A2A Protocol",
+    curriculumMilestone: "M2",
+    runtime: "Deterministic Workflow · A2A Receipt Gate (M2/M5)",
+    topology: "Deterministic Workflow: Code-routed test harness → structured judge → A2A VerificationReceipt",
     color: "rose",
     stage: 2,
     summary: "Make “done” a checkable claim with a recorded receipt.",
@@ -575,8 +598,11 @@ export const archetypes: Archetype[] = [
     shortName: "Box Sentinel",
     role: "Watch lifecycle signals and wake work only when something changes.",
     tag: "Reactive Observer",
-    runtime: "Event-Driven Actor",
-    topology: "Filesystem / telemetry events → observer → lifecycle requests",
+    controlTopology: "Deterministic Workflow",
+    executionRuntime: "Event-Driven / Append-Only Ledger",
+    curriculumMilestone: "M1",
+    runtime: "Event-Driven / Append-Only Ledger (M1)",
+    topology: "Deterministic Workflow: Ledger & filesystem events → reactive observer → lifecycle signals",
     color: "teal",
     stage: 4,
     summary: "Sleep between events. Observe changes. Signal the supervisor.",
@@ -699,8 +725,11 @@ export const archetypes: Archetype[] = [
     shortName: "Memory Curator",
     role: "Turn verified outcomes into scoped, reusable engineering lessons.",
     tag: "Post-Run Archivist",
-    runtime: "Async Batch Pipeline",
-    topology: "Completed run → distillation → validation → scoped memory",
+    controlTopology: "Deterministic Workflow",
+    executionRuntime: "Event-Driven / Append-Only Ledger",
+    curriculumMilestone: "M5",
+    runtime: "Event-Driven Batch Workflow (M1/M5)",
+    topology: "Deterministic Workflow: Finalized ledger events → distillation → validation → scoped memory",
     color: "slate",
     stage: 4,
     summary: "Preserve what worked, why it worked, and where it applies.",

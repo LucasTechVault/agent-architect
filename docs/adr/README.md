@@ -7,4 +7,10 @@
 | [0003](0003-delivery-and-decision-records.md) | Accepted | Public repositories, concise ADRs, tested conventional commits and CI |
 | [0004](0004-engineering-knowledge-vault.md) | Accepted | Dense shared technical reference, 20 issues, editable takeaways, and v1-to-v2 progress migration |
 
-Add the next numbered record for a material architectural change. Keep it brief: date/status, context, decision, consequences, implementation, and verification. Distinguish requirements from defaults and pending learner choices. Link superseding records when decisions change; keep this index current.
+## Curriculum & Milestone Micro-ADRs (`ADR-XXXX`)
+
+Every milestone checkpoint adds a strict 10-line Micro-ADR using the `ADR-XXXX-<slug>.md` naming convention defined in [`AGENTS.md`](../../AGENTS.md).
+
+| Record | Status | Decision |
+| --- | --- | --- |
+| [ADR-0001](ADR-0001-curriculum-and-playbook-synchronization.md) | Accepted | Synchronize archetypes, 9-block specs, and roadmap issues with M0–M5 Control Topologies and Execution Runtimes |

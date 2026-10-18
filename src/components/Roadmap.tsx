@@ -44,6 +44,9 @@ export default function Roadmap({ progress, setProgress }: RoadmapProps) {
         const text = [
           issue.id,
           issue.title,
+          issue.milestone,
+          issue.topology,
+          issue.runtime,
           ...issue.components,
           ...issue.requirements,
           ...issue.pitfalls,
@@ -277,6 +280,9 @@ function Issue({
         </button>
       </div>
       <div className="issue-components" aria-label="Target engine components">
+        <code>{issue.milestone}</code>
+        <code>{issue.topology}</code>
+        <code>{issue.runtime}</code>
         {issue.components.map((component) => (
           <code key={component}>{component}</code>
         ))}
