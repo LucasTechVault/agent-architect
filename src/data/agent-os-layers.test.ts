@@ -17,6 +17,13 @@ import {
   LAYER_MASTERY_STORAGE_KEY,
   loadLayerMastery,
 } from "../components/AgentOsBlueprint";
+import {
+  baselineStateContextImplications,
+  compositionAspects,
+  controlDirectionOptions,
+  l1ComposableRolesSummary,
+  l1CorePrinciple,
+} from "./l1-orchestration";
 
 describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
   it("defines all 7 layers (L1..L7) with 3-Box Boundary Flows, 3 Invariants, and 10% Contracts", () => {
@@ -238,5 +245,66 @@ describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
         configurable: true,
       });
     }
+  });
+
+  it("models L1 orchestration as composable design choices and links state/context mechanics to L2 and L3", () => {
+    expect(l1CorePrinciple).toBe(
+      "Execution and coordination choices shape state and context requirements.",
+    );
+
+    expect(l1ComposableRolesSummary).toHaveLength(4);
+    expect(l1ComposableRolesSummary.map((r) => r.term)).toEqual([
+      "ReAct-style loops",
+      "Graphs and state machines",
+      "Event-driven execution",
+      "Multi-agent coordination",
+    ]);
+
+    expect(
+      controlDirectionOptions.map((c) => ({
+        id: c.id,
+        title: c.title,
+        summary: c.summary,
+      })),
+    ).toEqual([
+      {
+        id: "code-directed",
+        title: "Code-directed workflow",
+        summary: "Authored control logic selects the next step.",
+      },
+      {
+        id: "model-directed",
+        title: "Model-directed agent",
+        summary:
+          "The model proposes the next action within runtime constraints.",
+      },
+      {
+        id: "mixed-control",
+        title: "Mixed control",
+        summary:
+          "Defined stages contain model-directed work where adaptation is needed.",
+      },
+    ]);
+
+    for (const option of controlDirectionOptions) {
+      expect(option.definition.length).toBeGreaterThan(20);
+      expect(option.useCase.length).toBeGreaterThan(20);
+      expect(option.tradeoff.length).toBeGreaterThan(20);
+      expect(option.l2Implication.length).toBeGreaterThan(20);
+      expect(option.l3Implication.length).toBeGreaterThan(20);
+    }
+
+    expect(compositionAspects.map((a) => a.title)).toEqual([
+      "Execution structure",
+      "Agent coordination",
+      "Invocation and delivery",
+    ]);
+
+    expect(baselineStateContextImplications).toHaveLength(4);
+    expect(
+      baselineStateContextImplications.some((i) =>
+        i.detail.includes("event sourcing"),
+      ),
+    ).toBe(true);
   });
 });

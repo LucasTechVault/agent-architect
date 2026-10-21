@@ -37,6 +37,7 @@ import SpecProperties, { PropertyGrid } from "./components/SpecProperties";
 import Roadmap from "./components/Roadmap";
 import AgentOsBlueprint from "./components/AgentOsBlueprint";
 import LandingPage from "./components/LandingPage";
+import L1OrchestrationDrilldown from "./components/L1OrchestrationDrilldown";
 import type { LayerId } from "./data/agent-os-layers";
 import {
   completion,
@@ -226,6 +227,14 @@ export default function App() {
     const rawLayer = query.get("layer") as LayerId | null;
     const initialLayerId =
       rawLayer && validLayerIds.has(rawLayer) ? rawLayer : undefined;
+    const viewMode = query.get("view");
+    if (initialLayerId === "L1" && viewMode !== "reference") {
+      return (
+        <main id="main-content" tabIndex={-1} ref={main} className="lp-main-root">
+          <L1OrchestrationDrilldown />
+        </main>
+      );
+    }
     return (
       <main id="main-content" tabIndex={-1} ref={main} className="ft-blueprint-root">
         <AgentOsBlueprint initialLayerId={initialLayerId} />

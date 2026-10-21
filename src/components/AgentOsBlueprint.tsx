@@ -289,6 +289,11 @@ export default function AgentOsBlueprint({
             <a href="#overview" className="ft-pill-link">
               ← Overview
             </a>
+            {selectedLayerId === "L1" && (
+              <a href="#blueprint?layer=L1" className="ft-pill-link">
+                ← L1 Concept View
+              </a>
+            )}
             <a href="#blueprint" className="ft-pill-link active">
               7-Layer OS Blueprint
             </a>
