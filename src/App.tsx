@@ -35,6 +35,7 @@ import { roadmapIssues, roadmapPhases } from "./data/roadmap";
 import EngineeringSheet from "./components/EngineeringSheet";
 import SpecProperties, { PropertyGrid } from "./components/SpecProperties";
 import Roadmap from "./components/Roadmap";
+import AgentOsBlueprint from "./components/AgentOsBlueprint";
 import {
   completion,
   decisionKey,
@@ -59,6 +60,7 @@ const icons = {
 const tabs = ["architecture", "milestones", "decisions"] as const;
 type DetailTab = (typeof tabs)[number];
 const nav = [
+  { id: "blueprint", label: "7-Layer OS Blueprint", icon: Box },
   { id: "archetypes", label: "Agent archetypes", icon: LayoutGrid },
   { id: "map", label: "System map", icon: Network },
   { id: "roadmap", label: "Build roadmap", icon: ListChecks },
@@ -94,7 +96,7 @@ function readInitial() {
     };
   }
 }
-const currentRoute = () => window.location.hash.slice(1) || "archetypes";
+const currentRoute = () => window.location.hash.slice(1) || "blueprint";
 function routeFor(agent: Archetype, tab: DetailTab, block?: string) {
   return `#agent/${agent.id}?tab=${tab}${block ? `&block=${block}` : ""}`;
 }
@@ -200,6 +202,13 @@ export default function App() {
       );
     }
     if (input.current) input.current.value = "";
+  }
+  if (path === "blueprint") {
+    return (
+      <main id="main-content" tabIndex={-1} ref={main} className="ft-blueprint-root">
+        <AgentOsBlueprint />
+      </main>
+    );
   }
   return (
     <>
