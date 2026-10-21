@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import {
+  CollapsibleConceptSection,
   ConceptHeroBar,
   ConceptTopHeader,
   MoreDetailDisclosure,
@@ -14,6 +15,7 @@ import {
   l6IntegrationOptions,
   l6IntroStatement,
   l6OutcomeCategories,
+  l6SectionIntuitions,
   l6SharedOwnershipPrinciple,
   l6TelemetryNote,
   type L6IntegrationId,
@@ -21,6 +23,17 @@ import {
 } from "../data/l6-tools-actions";
 
 export default function L6ToolsActionsDrilldown() {
+  // Collapsible section states (all expanded by default; user can collapse/expand individually or all at once)
+  const [expandedSections, setExpandedSections] = useState<{
+    A: boolean;
+    B: boolean;
+    C: boolean;
+  }>({
+    A: true,
+    B: true,
+    C: true,
+  });
+
   // Section A selection state
   const [selectedIntegrationId, setSelectedIntegrationId] =
     useState<L6IntegrationId>("enterprise-facades");
@@ -36,6 +49,21 @@ export default function L6ToolsActionsDrilldown() {
     "flow-execute-adapter",
   );
   const [flowDetailOpen, setFlowDetailOpen] = useState(false);
+
+  const allExpanded =
+    expandedSections.A && expandedSections.B && expandedSections.C;
+
+  function toggleSection(key: "A" | "B" | "C") {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  }
+
+  function toggleAllSections() {
+    const next = !allExpanded;
+    setExpandedSections({ A: next, B: next, C: next });
+  }
 
   const selectedIntegration =
     l6IntegrationOptions.find((i) => i.id === selectedIntegrationId) ??
@@ -70,38 +98,55 @@ export default function L6ToolsActionsDrilldown() {
           headingId="l6-page-heading"
         />
 
-        {/* Compact Introductory Framing */}
+        {/* Compact Introductory Framing + Expand/Collapse All Control */}
         <section
-          className="l1-composable-banner"
+          className="l1-composable-banner cd-intro-banner-row"
           aria-label="Tools and actions overview"
           data-testid="l6-intro-banner"
         >
           <p className="l1-composable-lead">
             {l6IntroStatement} <span>{l6ComposableNote}</span>
           </p>
+          <button
+            type="button"
+            className="cd-expand-all-btn"
+            data-testid="l6-toggle-all-sections"
+            onClick={toggleAllSections}
+          >
+            {allExpanded ? (
+              <>
+                <ChevronsDownUp size={14} aria-hidden="true" />
+                <span>Collapse all sections</span>
+              </>
+            ) : (
+              <>
+                <ChevronsUpDown size={14} aria-hidden="true" />
+                <span>Expand all sections</span>
+              </>
+            )}
+          </button>
         </section>
 
         {/* SECTION A — INTEGRATION & EXECUTION */}
-        <section
-          className="l1-section"
-          aria-labelledby="l6-section-a-heading"
-          data-testid="l6-section-a"
+        <CollapsibleConceptSection
+          stepLabel={l6SectionIntuitions.A.stepLabel}
+          heading={l6SectionIntuitions.A.heading}
+          headingId="l6-section-a-heading"
+          intuitionTitle={l6SectionIntuitions.A.intuitionTitle}
+          intuitionBody={l6SectionIntuitions.A.intuitionBody}
+          isExpanded={expandedSections.A}
+          onToggle={() => toggleSection("A")}
+          collapsedPreviewItems={l6IntegrationOptions.map((o) => ({
+            id: o.id,
+            number: o.number,
+            label: o.title,
+          }))}
+          onSelectCollapsedItem={(id) => {
+            setSelectedIntegrationId(id as L6IntegrationId);
+            setIntegrationDetailOpen(false);
+          }}
+          testId="l6-section-a"
         >
-          <div className="l1-section-header">
-            <div>
-              <span className="l1-section-step">
-                Section A · Integration &amp; execution
-              </span>
-              <h2 id="l6-section-a-heading">
-                How are capabilities connected and executed?
-              </h2>
-            </div>
-            <p className="l1-section-note">
-              Domain interfaces, protocols, and execution environments can be
-              combined behind the same internal port.
-            </p>
-          </div>
-
           <div
             className="l1-cards-grid-3"
             role="group"
@@ -121,7 +166,10 @@ export default function L6ToolsActionsDrilldown() {
                     setIntegrationDetailOpen(false);
                   }}
                 >
-                  <span className="l1-choice-title">{option.title}</span>
+                  <div className="cd-card-num-header">
+                    <span className="cd-subbox-num">{option.number}</span>
+                    <span className="l1-choice-title">{option.title}</span>
+                  </div>
                   <span className="l1-choice-summary">{option.subtitle}</span>
                 </button>
               );
@@ -136,22 +184,25 @@ export default function L6ToolsActionsDrilldown() {
             data-testid="l6-section-a-explanation"
           >
             <div className="l1-explanation-head">
-              <strong>{selectedIntegration.title}</strong>
+              <strong>
+                {selectedIntegration.number}. {selectedIntegration.title}
+              </strong>
               <span className="l1-explanation-tag">
-                Selected integration mechanism
+                Selected integration mechanism ({selectedIntegration.number} of
+                3)
               </span>
             </div>
             <div className="l1-explanation-grid">
               <div>
-                <span className="l1-field-label">Definition</span>
+                <span className="l1-field-label">1 · Definition</span>
                 <p>{selectedIntegration.definition}</p>
               </div>
               <div>
-                <span className="l1-field-label">Suitable use case</span>
+                <span className="l1-field-label">2 · Suitable use case</span>
                 <p>{selectedIntegration.useCase}</p>
               </div>
               <div>
-                <span className="l1-field-label">Main tradeoff</span>
+                <span className="l1-field-label">3 · Main tradeoff</span>
                 <p>{selectedIntegration.tradeoff}</p>
               </div>
             </div>
@@ -169,7 +220,10 @@ export default function L6ToolsActionsDrilldown() {
                   {selectedIntegration.mcpPrimitives.map((item) => (
                     <div key={item.primitive} className="cd-mcp-primitive-card">
                       <div className="cd-mcp-primitive-top">
-                        <strong>{item.primitive}</strong>
+                        <div className="cd-card-num-header">
+                          <span className="cd-subbox-num">{item.number}</span>
+                          <strong>{item.primitive}</strong>
+                        </div>
                         <span className="cd-stage-badge">
                           {item.layerTarget}
                         </span>
@@ -211,28 +265,32 @@ export default function L6ToolsActionsDrilldown() {
               testId="l6-section-a-more-detail"
             />
           </div>
-        </section>
+        </CollapsibleConceptSection>
 
         {/* SECTION B — OUTCOMES & RECOVERY */}
-        <section
-          className="l1-section"
-          aria-labelledby="l6-section-b-heading"
-          data-testid="l6-section-b"
+        <CollapsibleConceptSection
+          stepLabel={l6SectionIntuitions.B.stepLabel}
+          heading={l6SectionIntuitions.B.heading}
+          headingId="l6-section-b-heading"
+          intuitionTitle={l6SectionIntuitions.B.intuitionTitle}
+          intuitionBody={l6SectionIntuitions.B.intuitionBody}
+          isExpanded={expandedSections.B}
+          onToggle={() => toggleSection("B")}
+          collapsedPreviewItems={l6OutcomeCategories.map((o) => ({
+            id: o.id,
+            number: o.number,
+            label: o.title,
+          }))}
+          onSelectCollapsedItem={(id) => {
+            setSelectedOutcomeId(id as L6OutcomeId);
+            setOutcomeDetailOpen(false);
+          }}
+          testId="l6-section-b"
         >
-          <div className="l1-section-header">
-            <div>
-              <span className="l1-section-step">
-                Section B · Outcomes &amp; recovery
-              </span>
-              <h2 id="l6-section-b-heading">
-                What happens when execution cannot complete?
-              </h2>
-            </div>
-            <p className="l1-section-note">
-              Selecting an outcome highlights the affected stages in Section C’s
-              execution flow below.
-            </p>
-          </div>
+          <p className="l1-section-note">
+            Selecting an outcome below also highlights the affected stages in
+            Section C’s execution flow.
+          </p>
 
           {/* 5 Compact Selectable Outcome Rows */}
           <div
@@ -258,7 +316,7 @@ export default function L6ToolsActionsDrilldown() {
                     <span className="cd-outcome-num">{outcome.number}</span>
                     <div className="cd-outcome-copy">
                       <strong className="cd-outcome-title">
-                        {outcome.title}
+                        {outcome.number}. {outcome.title}
                       </strong>
                       <span className="cd-outcome-sub">
                         {outcome.shortPurpose}
@@ -292,15 +350,15 @@ export default function L6ToolsActionsDrilldown() {
             </div>
             <div className="l1-explanation-grid">
               <div>
-                <span className="l1-field-label">Detected condition</span>
+                <span className="l1-field-label">1 · Detected condition</span>
                 <p>{selectedOutcome.detectedCondition}</p>
               </div>
               <div>
-                <span className="l1-field-label">Handling decision</span>
+                <span className="l1-field-label">2 · Handling decision</span>
                 <p>{selectedOutcome.handlingDecision}</p>
               </div>
               <div>
-                <span className="l1-field-label">Returned outcome</span>
+                <span className="l1-field-label">3 · Returned outcome</span>
                 <p>{selectedOutcome.returnedOutcome}</p>
               </div>
             </div>
@@ -322,40 +380,43 @@ export default function L6ToolsActionsDrilldown() {
             </span>
             <p>{l6SharedOwnershipPrinciple}</p>
           </div>
-        </section>
+        </CollapsibleConceptSection>
 
         {/* SECTION C — TOOL EXECUTION FLOW */}
-        <section
-          className="l1-section"
-          aria-labelledby="l6-section-c-heading"
-          data-testid="l6-section-c"
+        <CollapsibleConceptSection
+          stepLabel={l6SectionIntuitions.C.stepLabel}
+          heading={l6SectionIntuitions.C.heading}
+          headingId="l6-section-c-heading"
+          intuitionTitle={l6SectionIntuitions.C.intuitionTitle}
+          intuitionBody={l6SectionIntuitions.C.intuitionBody}
+          isExpanded={expandedSections.C}
+          onToggle={() => toggleSection("C")}
+          collapsedPreviewItems={l6ExecutionFlowStages.map((s) => ({
+            id: s.id,
+            number: `Stage ${s.number}`,
+            label: s.title,
+          }))}
+          onSelectCollapsedItem={(id) => {
+            setSelectedFlowStageId(id);
+            setFlowDetailOpen(false);
+          }}
+          testId="l6-section-c"
         >
-          <div className="l1-section-header">
-            <div>
-              <span className="l1-section-step">
-                Section C · Tool execution flow
-              </span>
-              <h2 id="l6-section-c-heading">
-                How does a tool request become an observation?
-              </h2>
-            </div>
-            <p className="l1-section-note">
-              Raw tool responses are not automatically injected verbatim into
-              the prompt; L3 selects a bounded observation.
-            </p>
-          </div>
-
           {/* Active Outcome Highlight Legend */}
           <div className="cd-flow-legend">
             <span className="cd-legend-item">
               <span className="cd-legend-swatch is-selected" />
-              <span>Selected flow stage ({selectedFlowStage.title})</span>
+              <span>
+                Selected flow stage (Stage {selectedFlowStage.number} ·{" "}
+                {selectedFlowStage.title})
+              </span>
             </span>
             <span className="cd-legend-item">
               <span className="cd-legend-swatch is-outcome" />
               <span>
-                Highlighted by Section B outcome ({selectedOutcome.title}:
-                Stages {selectedOutcome.highlightedFlowStages.join(", ")})
+                Highlighted by Section B outcome ({selectedOutcome.number}.{" "}
+                {selectedOutcome.title}: Stages{" "}
+                {selectedOutcome.highlightedFlowStages.join(", ")})
               </span>
             </span>
           </div>
@@ -409,7 +470,7 @@ export default function L6ToolsActionsDrilldown() {
                             </span>
                           </div>
                           <strong className="cd-stage-title">
-                            {stage.title}
+                            {stage.number}. {stage.title}
                           </strong>
                           <span className="cd-stage-sub">{stage.subtitle}</span>
                         </button>
@@ -444,15 +505,15 @@ export default function L6ToolsActionsDrilldown() {
             </div>
             <div className="l1-explanation-grid">
               <div>
-                <span className="l1-field-label">Input</span>
+                <span className="l1-field-label">1 · Input</span>
                 <p>{selectedFlowStage.input}</p>
               </div>
               <div>
-                <span className="l1-field-label">Transformation</span>
+                <span className="l1-field-label">2 · Transformation</span>
                 <p>{selectedFlowStage.transformation}</p>
               </div>
               <div>
-                <span className="l1-field-label">Output</span>
+                <span className="l1-field-label">3 · Output</span>
                 <p>{selectedFlowStage.output}</p>
               </div>
             </div>
@@ -471,6 +532,7 @@ export default function L6ToolsActionsDrilldown() {
                     <Fragment key={node}>
                       {idx > 0 && <StageArrowConnector />}
                       <div className="cd-lifecycle-pill">
+                        <span className="cd-lifecycle-num">{idx + 1}</span>
                         <strong>{node}</strong>
                       </div>
                     </Fragment>
@@ -497,7 +559,7 @@ export default function L6ToolsActionsDrilldown() {
               className="cd-cross-links-grid"
               data-testid="l6-cross-layer-links"
             >
-              {l6CrossLayerLinks.map((link) => (
+              {l6CrossLayerLinks.map((link, idx) => (
                 <a
                   key={link.layerId}
                   href={`#blueprint?layer=${link.layerId}`}
@@ -505,7 +567,10 @@ export default function L6ToolsActionsDrilldown() {
                   data-testid={`l6-link-to-${link.layerId}`}
                 >
                   <div className="l1-dest-top">
-                    <span className="lp-layer-id">{link.layerId}</span>
+                    <div className="cd-card-num-header">
+                      <span className="cd-subbox-num">{idx + 1}</span>
+                      <span className="lp-layer-id">{link.layerId}</span>
+                    </div>
                     <span className="l1-dest-action">
                       <span>Open {link.layerId}</span>
                       <ArrowRight size={13} aria-hidden="true" />
@@ -517,7 +582,7 @@ export default function L6ToolsActionsDrilldown() {
               ))}
             </div>
           </div>
-        </section>
+        </CollapsibleConceptSection>
       </div>
     </div>
   );

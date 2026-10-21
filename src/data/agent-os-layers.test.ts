@@ -33,6 +33,7 @@ import {
   l3OnlineRetrievalStages,
   l3PipelineAccessProvenanceNote,
   l3PrefixCachingNote,
+  l3SectionIntuitions,
   l3SharedContextPrinciple,
 } from "./l3-context-memory";
 import {
@@ -42,6 +43,7 @@ import {
   l6IntegrationOptions,
   l6IntroStatement,
   l6OutcomeCategories,
+  l6SectionIntuitions,
   l6SharedOwnershipPrinciple,
 } from "./l6-tools-actions";
 
@@ -369,6 +371,11 @@ describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
       },
     ]);
 
+    expect(l3ContextSources.map((s) => s.number)).toEqual([1, 2, 3, 4]);
+    expect(l3SectionIntuitions.A.intuitionBody).toContain("stateless");
+    expect(l3SectionIntuitions.B.intuitionBody).toContain("permission boundaries");
+    expect(l3SectionIntuitions.C.intuitionBody).toContain("token budget");
+
     expect(l3OfflinePreparationStages).toHaveLength(6);
     expect(l3OfflinePreparationStages.map((s) => s.title)).toEqual([
       "Landing",
@@ -439,6 +446,14 @@ describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
         subtitle: "Execute code or browser work within explicit boundaries.",
       },
     ]);
+
+    expect(l6IntegrationOptions.map((o) => o.number)).toEqual([1, 2, 3]);
+    expect(
+      l6IntegrationOptions[1].mcpPrimitives?.map((p) => p.number),
+    ).toEqual(["2.1", "2.2", "2.3"]);
+    expect(l6SectionIntuitions.A.intuitionBody).toContain("blast-radius");
+    expect(l6SectionIntuitions.B.intuitionBody).toContain("duplicate side effects");
+    expect(l6SectionIntuitions.C.intuitionBody).toContain("proposal");
 
     expect(
       l6IntegrationOptions[1].mcpPrimitives?.map((p) => p.primitive),

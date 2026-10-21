@@ -7,6 +7,7 @@ export type L6IntegrationId =
 
 export interface L6IntegrationOption {
   id: L6IntegrationId;
+  number: 1 | 2 | 3;
   title: string;
   subtitle: string;
   definition: string;
@@ -14,11 +15,20 @@ export interface L6IntegrationOption {
   tradeoff: string;
   moreDetail: string[];
   mcpPrimitives?: {
+    number: string;
     primitive: "Tools" | "Resources" | "Prompts";
     role: string;
     layerTarget: string;
   }[];
   sandboxLifecycle?: string[];
+}
+
+export interface L6SectionIntuition {
+  sectionKey: "A" | "B" | "C";
+  stepLabel: string;
+  heading: string;
+  intuitionTitle: string;
+  intuitionBody: string;
 }
 
 export type L6OutcomeId =
@@ -66,9 +76,37 @@ export const l6IntroStatement =
 export const l6ComposableNote =
   "These three mechanisms are composable: for example, an MCP-exposed tool can invoke an enterprise service façade or dispatch work into an isolated sandbox behind the same internal port.";
 
+export const l6SectionIntuitions: Record<"A" | "B" | "C", L6SectionIntuition> = {
+  A: {
+    sectionKey: "A",
+    stepLabel: "Section A · Integration & execution",
+    heading: "How are capabilities connected and executed?",
+    intuitionTitle: "Why an agent needs controlled capability boundaries",
+    intuitionBody:
+      "A model on its own can only emit text tokens—it cannot query a live service, run a diagnostic script, or interact with a browser. Yet giving a model direct, unguarded access to backend APIs or host shells creates an immediate blast-radius and security risk. L6 connects the agent to external capabilities through scoped domain façades, standard protocol adapters, and isolated sandboxes so every action executes within explicit permission, resource, and time boundaries.",
+  },
+  B: {
+    sectionKey: "B",
+    stepLabel: "Section B · Outcomes & recovery",
+    heading: "What happens when execution cannot complete?",
+    intuitionTitle: "Why tool failures must be classified rather than treated identically",
+    intuitionBody:
+      "Real-world tool calls fail in fundamentally different ways: a rate-limited read is safe to retry automatically, a hallucinated parameter needs the model to repair its arguments, and a timed-out mutation cannot be blindly repeated without risking duplicate side effects. If L6 treats every error the same, the agent either wastes budget retrying broken credentials, double-executes mutations, or crashes on repairable mistakes.",
+  },
+  C: {
+    sectionKey: "C",
+    stepLabel: "Section C · Tool execution flow",
+    heading: "How does a tool request become an observation?",
+    intuitionTitle: "Why a model's tool call must pass through a governed six-stage pipeline",
+    intuitionBody:
+      "A model’s tool call is only a proposal, not an execution command, and a raw API or sandbox payload is rarely safe or compact enough to paste verbatim into the next prompt. Without a governed end-to-end execution flow, unauthorized calls bypass policy, worker crashes leave unrecorded in-flight side effects, and oversized responses overflow the model's context. This six-stage pipeline turns a proposed call into a verified, budgeted observation.",
+  },
+};
+
 export const l6IntegrationOptions: L6IntegrationOption[] = [
   {
     id: "enterprise-facades",
+    number: 1,
     title: "Enterprise APIs & service façades",
     subtitle: "Expose clear domain operations through stable contracts.",
     definition:
@@ -84,6 +122,7 @@ export const l6IntegrationOptions: L6IntegrationOption[] = [
   },
   {
     id: "mcp-adapters",
+    number: 2,
     title: "MCP client adapters",
     subtitle: "Connect standard capabilities to the application’s interfaces.",
     definition:
@@ -98,16 +137,19 @@ export const l6IntegrationOptions: L6IntegrationOption[] = [
     ],
     mcpPrimitives: [
       {
+        number: "2.1",
         primitive: "Tools",
         role: "Callable capabilities invoked behind the internal L6 execution interface.",
         layerTarget: "L6 · Tools & Actions",
       },
       {
+        number: "2.2",
         primitive: "Resources",
         role: "Contextual data and reference payloads supplied to context preparation.",
         layerTarget: "L3 · Context & Memory",
       },
       {
+        number: "2.3",
         primitive: "Prompts",
         role: "Reusable message or instruction templates integrated during context assembly.",
         layerTarget: "L3 · Context & Memory",
@@ -116,6 +158,7 @@ export const l6IntegrationOptions: L6IntegrationOption[] = [
   },
   {
     id: "isolated-environments",
+    number: 3,
     title: "Isolated code & browser environments",
     subtitle: "Execute code or browser work within explicit boundaries.",
     definition:

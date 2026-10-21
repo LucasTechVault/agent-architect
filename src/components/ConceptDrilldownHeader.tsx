@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -291,4 +291,120 @@ export function StageArrowConnector({
     </div>
   );
 }
+
+export interface CollapsedPreviewItem {
+  id: string;
+  number: string | number;
+  label: string;
+}
+
+export function CollapsibleConceptSection({
+  stepLabel,
+  heading,
+  headingId,
+  intuitionTitle,
+  intuitionBody,
+  isExpanded,
+  onToggle,
+  collapsedPreviewItems,
+  onSelectCollapsedItem,
+  testId,
+  children,
+}: {
+  stepLabel: string;
+  heading: string;
+  headingId: string;
+  intuitionTitle: string;
+  intuitionBody: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+  collapsedPreviewItems: CollapsedPreviewItem[];
+  onSelectCollapsedItem?: (id: string) => void;
+  testId: string;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      className={`l1-section cd-collapsible-section ${isExpanded ? "is-expanded" : "is-collapsed"}`}
+      aria-labelledby={headingId}
+      data-testid={testId}
+    >
+      <div className="cd-section-top-bar">
+        <div
+          className="cd-section-title-clickable"
+          onClick={onToggle}
+          role="presentation"
+        >
+          <span className="l1-section-step">{stepLabel}</span>
+          <h2 id={headingId}>{heading}</h2>
+        </div>
+
+        <button
+          type="button"
+          className="cd-section-collapse-btn"
+          aria-expanded={isExpanded}
+          data-testid={`${testId}-toggle`}
+          onClick={onToggle}
+        >
+          {isExpanded ? (
+            <>
+              <ChevronDown size={15} aria-hidden="true" />
+              <span>Collapse section</span>
+            </>
+          ) : (
+            <>
+              <ChevronRight size={15} aria-hidden="true" />
+              <span>Expand section ({collapsedPreviewItems.length})</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Intuitive explanation — prominently visible when collapsed and grounds the section when expanded */}
+      <div
+        className="cd-section-intuition"
+        data-testid={`${testId}-intuition`}
+      >
+        <div className="cd-intuition-header">
+          <span className="cd-intuition-badge">Intuitive overview</span>
+          <strong className="cd-intuition-title">{intuitionTitle}</strong>
+        </div>
+        <p className="cd-intuition-body">{intuitionBody}</p>
+      </div>
+
+      {/* When collapsed: show numbered sub-boxes preview pills so user sees what's inside and can click to jump in */}
+      {!isExpanded && (
+        <div
+          className="cd-collapsed-preview"
+          data-testid={`${testId}-collapsed-preview`}
+        >
+          <span className="cd-collapsed-preview-label">
+            Numbered sub-topics inside this section (click any item to expand):
+          </span>
+          <div className="cd-collapsed-pills">
+            {collapsedPreviewItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="cd-collapsed-pill"
+                data-testid={`${testId}-preview-pill-${item.id}`}
+                onClick={() => {
+                  onToggle();
+                  onSelectCollapsedItem?.(item.id);
+                }}
+              >
+                <span className="cd-subbox-num">{item.number}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* When expanded: show the interactive sub-boxes, diagrams, and explanation panels */}
+      {isExpanded && <div className="cd-section-body">{children}</div>}
+    </section>
+  );
+}
+
 

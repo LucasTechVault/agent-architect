@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import {
+  CollapsibleConceptSection,
   ConceptHeroBar,
   ConceptTopHeader,
   MoreDetailDisclosure,
@@ -16,6 +17,7 @@ import {
   l3PipelineAccessProvenanceNote,
   l3PipelineReferenceNote,
   l3PrefixCachingNote,
+  l3SectionIntuitions,
   l3SharedContextPrinciple,
   type ContextSourceId,
   type PipelineStageItem,
@@ -23,6 +25,17 @@ import {
 } from "../data/l3-context-memory";
 
 export default function L3ContextMemoryDrilldown() {
+  // Collapsible section states (all expanded by default; user can collapse/expand individually or all at once)
+  const [expandedSections, setExpandedSections] = useState<{
+    A: boolean;
+    B: boolean;
+    C: boolean;
+  }>({
+    A: true,
+    B: true,
+    C: true,
+  });
+
   // Section A selection state
   const [selectedSourceId, setSelectedSourceId] =
     useState<ContextSourceId>("working-context");
@@ -41,6 +54,21 @@ export default function L3ContextMemoryDrilldown() {
   const [selectedAssemblyStageId, setSelectedAssemblyStageId] =
     useState<string>("assembly-select");
   const [assemblyDetailOpen, setAssemblyDetailOpen] = useState(false);
+
+  const allExpanded =
+    expandedSections.A && expandedSections.B && expandedSections.C;
+
+  function toggleSection(key: "A" | "B" | "C") {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  }
+
+  function toggleAllSections() {
+    const next = !allExpanded;
+    setExpandedSections({ A: next, B: next, C: next });
+  }
 
   const selectedSource =
     l3ContextSources.find((s) => s.id === selectedSourceId) ??
@@ -101,35 +129,54 @@ export default function L3ContextMemoryDrilldown() {
           headingId="l3-page-heading"
         />
 
-        {/* Compact Introductory Framing */}
+        {/* Compact Introductory Framing + Expand/Collapse All Control */}
         <section
-          className="l1-composable-banner"
+          className="l1-composable-banner cd-intro-banner-row"
           aria-label="Context and memory overview"
           data-testid="l3-intro-banner"
         >
           <p className="l1-composable-lead">{l3IntroStatement}</p>
+          <button
+            type="button"
+            className="cd-expand-all-btn"
+            data-testid="l3-toggle-all-sections"
+            onClick={toggleAllSections}
+          >
+            {allExpanded ? (
+              <>
+                <ChevronsDownUp size={14} aria-hidden="true" />
+                <span>Collapse all sections</span>
+              </>
+            ) : (
+              <>
+                <ChevronsUpDown size={14} aria-hidden="true" />
+                <span>Expand all sections</span>
+              </>
+            )}
+          </button>
         </section>
 
         {/* SECTION A — CONTEXT SOURCES */}
-        <section
-          className="l1-section"
-          aria-labelledby="l3-section-a-heading"
-          data-testid="l3-section-a"
+        <CollapsibleConceptSection
+          stepLabel={l3SectionIntuitions.A.stepLabel}
+          heading={l3SectionIntuitions.A.heading}
+          headingId="l3-section-a-heading"
+          intuitionTitle={l3SectionIntuitions.A.intuitionTitle}
+          intuitionBody={l3SectionIntuitions.A.intuitionBody}
+          isExpanded={expandedSections.A}
+          onToggle={() => toggleSection("A")}
+          collapsedPreviewItems={l3ContextSources.map((s) => ({
+            id: s.id,
+            number: s.number,
+            label: s.title,
+          }))}
+          onSelectCollapsedItem={(id) => {
+            setSelectedSourceId(id as ContextSourceId);
+            setSourceDetailOpen(false);
+          }}
+          testId="l3-section-a"
         >
-          <div className="l1-section-header">
-            <div>
-              <span className="l1-section-step">Section A · Context sources</span>
-              <h2 id="l3-section-a-heading">
-                Where does the model’s context come from?
-              </h2>
-            </div>
-            <p className="l1-section-note">
-              Select a context source to inspect its role, use case, and primary
-              tradeoff.
-            </p>
-          </div>
-
-          {/* 2 x 2 Selectable Card Grid */}
+          {/* 2 x 2 Numbered Selectable Card Grid */}
           <div
             className="cd-cards-grid-2x2"
             role="group"
@@ -149,7 +196,10 @@ export default function L3ContextMemoryDrilldown() {
                     setSourceDetailOpen(false);
                   }}
                 >
-                  <span className="l1-choice-title">{source.title}</span>
+                  <div className="cd-card-num-header">
+                    <span className="cd-subbox-num">{source.number}</span>
+                    <span className="l1-choice-title">{source.title}</span>
+                  </div>
                   <span className="l1-choice-summary">{source.subtitle}</span>
                 </button>
               );
@@ -164,20 +214,24 @@ export default function L3ContextMemoryDrilldown() {
             data-testid="l3-section-a-explanation"
           >
             <div className="l1-explanation-head">
-              <strong>{selectedSource.title}</strong>
-              <span className="l1-explanation-tag">Selected context source</span>
+              <strong>
+                {selectedSource.number}. {selectedSource.title}
+              </strong>
+              <span className="l1-explanation-tag">
+                Selected context source ({selectedSource.number} of 4)
+              </span>
             </div>
             <div className="l1-explanation-grid">
               <div>
-                <span className="l1-field-label">Definition</span>
+                <span className="l1-field-label">1 · Definition</span>
                 <p>{selectedSource.definition}</p>
               </div>
               <div>
-                <span className="l1-field-label">Suitable use case</span>
+                <span className="l1-field-label">2 · Suitable use case</span>
                 <p>{selectedSource.useCase}</p>
               </div>
               <div>
-                <span className="l1-field-label">Main tradeoff</span>
+                <span className="l1-field-label">3 · Main tradeoff</span>
                 <p>{selectedSource.tradeoff}</p>
               </div>
             </div>
@@ -197,27 +251,28 @@ export default function L3ContextMemoryDrilldown() {
             <span className="cd-principle-label">Shared context principle</span>
             <p>{l3SharedContextPrinciple}</p>
           </div>
-        </section>
+        </CollapsibleConceptSection>
 
         {/* SECTION B — KNOWLEDGE PREPARATION & RETRIEVAL */}
-        <section
-          className="l1-section"
-          aria-labelledby="l3-section-b-heading"
-          data-testid="l3-section-b"
+        <CollapsibleConceptSection
+          stepLabel={l3SectionIntuitions.B.stepLabel}
+          heading={l3SectionIntuitions.B.heading}
+          headingId="l3-section-b-heading"
+          intuitionTitle={l3SectionIntuitions.B.intuitionTitle}
+          intuitionBody={l3SectionIntuitions.B.intuitionBody}
+          isExpanded={expandedSections.B}
+          onToggle={() => toggleSection("B")}
+          collapsedPreviewItems={activePipelineStages.map((s) => ({
+            id: s.id,
+            number: `Stage ${s.number}`,
+            label: s.title,
+          }))}
+          onSelectCollapsedItem={(id) => handleSelectPipelineStage(id)}
+          testId="l3-section-b"
         >
-          <div className="l1-section-header">
-            <div>
-              <span className="l1-section-step">
-                Section B · Knowledge preparation &amp; retrieval
-              </span>
-              <h2 id="l3-section-b-heading">
-                How does source information become useful evidence?
-              </h2>
-            </div>
-            <p className="l1-section-note">{l3PipelineReferenceNote}</p>
-          </div>
+          <p className="l1-section-note">{l3PipelineReferenceNote}</p>
 
-          {/* Two Switchable Pipeline Tabs */}
+          {/* Two Switchable Numbered Pipeline Tabs */}
           <div className="cd-pipeline-toolbar">
             <div
               className="cd-tabs"
@@ -237,6 +292,7 @@ export default function L3ContextMemoryDrilldown() {
                   setPipelineDetailOpen(false);
                 }}
               >
+                <span className="cd-subbox-num">1</span>
                 <span>Offline preparation</span>
                 <span className="cd-tab-count">6 stages</span>
               </button>
@@ -253,6 +309,7 @@ export default function L3ContextMemoryDrilldown() {
                   setPipelineDetailOpen(false);
                 }}
               >
+                <span className="cd-subbox-num">2</span>
                 <span>Online retrieval &amp; answering</span>
                 <span className="cd-tab-count">7 stages</span>
               </button>
@@ -288,10 +345,7 @@ export default function L3ContextMemoryDrilldown() {
               return (
                 <Fragment key={rowIndex}>
                   {rowIndex > 0 && (
-                    <div
-                      className="cd-row-continuation"
-                      aria-hidden="true"
-                    >
+                    <div className="cd-row-continuation" aria-hidden="true">
                       <span>
                         ↵ Continues to stage {rowStages[0].number} ·{" "}
                         {rowStages[0].title}
@@ -324,7 +378,7 @@ export default function L3ContextMemoryDrilldown() {
                               )}
                             </div>
                             <strong className="cd-stage-title">
-                              {stage.title}
+                              {stage.number}. {stage.title}
                             </strong>
                             <span className="cd-stage-sub">
                               {stage.subtitle}
@@ -353,21 +407,21 @@ export default function L3ContextMemoryDrilldown() {
               </strong>
               <span className="l1-explanation-tag">
                 {activePipelineTab === "offline"
-                  ? "Offline preparation stage"
-                  : "Online retrieval & answering stage"}
+                  ? "Pipeline 1 · Offline preparation stage"
+                  : "Pipeline 2 · Online retrieval & answering stage"}
               </span>
             </div>
             <div className="l1-explanation-grid">
               <div>
-                <span className="l1-field-label">Input</span>
+                <span className="l1-field-label">1 · Input</span>
                 <p>{selectedPipelineStage.input}</p>
               </div>
               <div>
-                <span className="l1-field-label">Transformation</span>
+                <span className="l1-field-label">2 · Transformation</span>
                 <p>{selectedPipelineStage.transformation}</p>
               </div>
               <div>
-                <span className="l1-field-label">Output</span>
+                <span className="l1-field-label">3 · Output</span>
                 <p>{selectedPipelineStage.output}</p>
               </div>
             </div>
@@ -378,27 +432,28 @@ export default function L3ContextMemoryDrilldown() {
               testId="l3-section-b-more-detail"
             />
           </div>
-        </section>
+        </CollapsibleConceptSection>
 
         {/* SECTION C — CONTEXT ASSEMBLY */}
-        <section
-          className="l1-section"
-          aria-labelledby="l3-section-c-heading"
-          data-testid="l3-section-c"
+        <CollapsibleConceptSection
+          stepLabel={l3SectionIntuitions.C.stepLabel}
+          heading={l3SectionIntuitions.C.heading}
+          headingId="l3-section-c-heading"
+          intuitionTitle={l3SectionIntuitions.C.intuitionTitle}
+          intuitionBody={l3SectionIntuitions.C.intuitionBody}
+          isExpanded={expandedSections.C}
+          onToggle={() => toggleSection("C")}
+          collapsedPreviewItems={l3ContextAssemblyStages.map((s) => ({
+            id: s.id,
+            number: `Step ${s.number}`,
+            label: s.title,
+          }))}
+          onSelectCollapsedItem={(id) => {
+            setSelectedAssemblyStageId(id);
+            setAssemblyDetailOpen(false);
+          }}
+          testId="l3-section-c"
         >
-          <div className="l1-section-header">
-            <div>
-              <span className="l1-section-step">Section C · Context assembly</span>
-              <h2 id="l3-section-c-heading">
-                How is the next model context assembled?
-              </h2>
-            </div>
-            <p className="l1-section-note">
-              L3 combines selected inputs into a budgeted, role-separated
-              request before handing off to L4.
-            </p>
-          </div>
-
           {/* 5-Stage Illustrative Context Assembly Flow (Row 1: 1-3, Row 2: 4-5) */}
           <div
             className="cd-pipeline-diagram"
@@ -432,7 +487,9 @@ export default function L3ContextMemoryDrilldown() {
                           </span>
                         )}
                       </div>
-                      <strong className="cd-stage-title">{stage.title}</strong>
+                      <strong className="cd-stage-title">
+                        {stage.number}. {stage.title}
+                      </strong>
                       <span className="cd-stage-sub">{stage.subtitle}</span>
                     </button>
                   </Fragment>
@@ -470,7 +527,9 @@ export default function L3ContextMemoryDrilldown() {
                           </span>
                         )}
                       </div>
-                      <strong className="cd-stage-title">{stage.title}</strong>
+                      <strong className="cd-stage-title">
+                        {stage.number}. {stage.title}
+                      </strong>
                       <span className="cd-stage-sub">{stage.subtitle}</span>
                     </button>
                   </Fragment>
@@ -492,20 +551,20 @@ export default function L3ContextMemoryDrilldown() {
                 {selectedAssemblyStage.title}
               </strong>
               <span className="l1-explanation-tag">
-                Context assembly step
+                Context assembly step ({selectedAssemblyStage.number} of 5)
               </span>
             </div>
             <div className="l1-explanation-grid">
               <div>
-                <span className="l1-field-label">Input</span>
+                <span className="l1-field-label">1 · Input</span>
                 <p>{selectedAssemblyStage.input}</p>
               </div>
               <div>
-                <span className="l1-field-label">Transformation</span>
+                <span className="l1-field-label">2 · Transformation</span>
                 <p>{selectedAssemblyStage.transformation}</p>
               </div>
               <div>
-                <span className="l1-field-label">Output</span>
+                <span className="l1-field-label">3 · Output</span>
                 <p>{selectedAssemblyStage.output}</p>
               </div>
             </div>
@@ -533,7 +592,7 @@ export default function L3ContextMemoryDrilldown() {
               className="cd-cross-links-grid"
               data-testid="l3-cross-layer-links"
             >
-              {l3CrossLayerLinks.map((link) => (
+              {l3CrossLayerLinks.map((link, idx) => (
                 <a
                   key={link.layerId}
                   href={`#blueprint?layer=${link.layerId}`}
@@ -541,7 +600,10 @@ export default function L3ContextMemoryDrilldown() {
                   data-testid={`l3-link-to-${link.layerId}`}
                 >
                   <div className="l1-dest-top">
-                    <span className="lp-layer-id">{link.layerId}</span>
+                    <div className="cd-card-num-header">
+                      <span className="cd-subbox-num">{idx + 1}</span>
+                      <span className="lp-layer-id">{link.layerId}</span>
+                    </div>
                     <span className="l1-dest-action">
                       <span>Open {link.layerId}</span>
                       <ArrowRight size={13} aria-hidden="true" />
@@ -553,7 +615,7 @@ export default function L3ContextMemoryDrilldown() {
               ))}
             </div>
           </div>
-        </section>
+        </CollapsibleConceptSection>
       </div>
     </div>
   );

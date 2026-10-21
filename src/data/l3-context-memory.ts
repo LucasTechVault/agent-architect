@@ -8,12 +8,21 @@ export type ContextSourceId =
 
 export interface ContextSourceOption {
   id: ContextSourceId;
+  number: 1 | 2 | 3 | 4;
   title: string;
   subtitle: string;
   definition: string;
   useCase: string;
   tradeoff: string;
   moreDetail: string[];
+}
+
+export interface SectionIntuition {
+  sectionKey: "A" | "B" | "C";
+  stepLabel: string;
+  heading: string;
+  intuitionTitle: string;
+  intuitionBody: string;
 }
 
 export type RagPipelineTabId = "offline" | "online";
@@ -52,12 +61,40 @@ export interface CrossLayerReference {
 export const l3IntroStatement =
   "Working context, retrieved knowledge, skills, and long-term memory provide different inputs. L3 selects and assembles them within the model’s context budget.";
 
+export const l3SectionIntuitions: Record<"A" | "B" | "C", SectionIntuition> = {
+  A: {
+    sectionKey: "A",
+    stepLabel: "Section A · Context sources",
+    heading: "Where does the model’s context come from?",
+    intuitionTitle: "Why an agent needs context sources",
+    intuitionBody:
+      "A language model is stateless on each call—it has no built-in awareness of your active task progress, private documents, procedural playbooks, or prior sessions. Without assembling the right context sources, the agent cannot function properly: it loses track of the user's goal mid-run, guesses domain facts instead of checking evidence, and repeats mistakes across runs. L3 gathers four distinct input sources while keeping governing instructions strictly separated from untrusted data.",
+  },
+  B: {
+    sectionKey: "B",
+    stepLabel: "Section B · Knowledge preparation & retrieval",
+    heading: "How does source information become useful evidence?",
+    intuitionTitle: "Why raw sources must be prepared and retrieved within scope",
+    intuitionBody:
+      "Raw enterprise documents, manuals, and databases cannot simply be dumped into a prompt—they are too large, noisy, and mixed across permission boundaries. Without structured preparation and scoped retrieval, the agent overflows its context window with irrelevant text, leaks restricted records across users, or cites unsupported claims. These reference pipelines turn raw sources into traceable, access-controlled evidence.",
+  },
+  C: {
+    sectionKey: "C",
+    stepLabel: "Section C · Context assembly",
+    heading: "How is the next model context assembled?",
+    intuitionTitle: "Why selected inputs must be budgeted and structured before inference",
+    intuitionBody:
+      "Even after gathering turn history, retrieved evidence, skills, and memory, the model operates under a strict token budget and relies on clear role boundaries. Without disciplined assembly, bulky tool outputs crowd out system instructions, stale turns dilute active constraints, and untrusted text can be mistaken for instructions. L3 selects, scopes, compacts, and renders a canonical request before handing off to L4.",
+  },
+};
+
 export const l3SharedContextPrinciple =
   "Governing instructions and authorised tool definitions occupy a privileged control role. Retrieved evidence and tool observations are untrusted data inputs—retrieved text must never silently become governing instruction.";
 
 export const l3ContextSources: ContextSourceOption[] = [
   {
     id: "working-context",
+    number: 1,
     title: "Working context & turn history",
     subtitle:
       "Carry forward the goal, relevant observations, and current task context.",
@@ -75,6 +112,7 @@ export const l3ContextSources: ContextSourceOption[] = [
   },
   {
     id: "retrieved-knowledge",
+    number: 2,
     title: "Retrieved knowledge · RAG",
     subtitle: "Bring authorised external evidence into the current task.",
     definition:
@@ -91,6 +129,7 @@ export const l3ContextSources: ContextSourceOption[] = [
   },
   {
     id: "skills-procedures",
+    number: 3,
     title: "Skills & procedures",
     subtitle:
       "Load reusable instructions and supporting resources when relevant.",
@@ -107,6 +146,7 @@ export const l3ContextSources: ContextSourceOption[] = [
   },
   {
     id: "cross-session-memory",
+    number: 4,
     title: "Cross-session memory",
     subtitle: "Reuse relevant facts and past experiences across runs.",
     definition:
