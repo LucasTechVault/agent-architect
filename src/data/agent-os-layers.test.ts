@@ -146,37 +146,37 @@ describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
       {
         id: "L1",
         title: "Orchestration",
-        desc: "Decide how an agent run starts and coordinates its work.",
+        desc: "Start the run and coordinate its work.",
       },
       {
         id: "L2",
         title: "Runtime & State",
-        desc: "Manage execution state, budgets, checkpoints, and recovery.",
+        desc: "Manage state, budgets, checkpoints, and recovery.",
       },
       {
         id: "L3",
         title: "Context & Memory",
-        desc: "Prepare the information the model needs for each step.",
+        desc: "Prepare the context for the next model call.",
       },
       {
         id: "L4",
         title: "Model Gateway",
-        desc: "Connect the runtime to models through a consistent interface.",
+        desc: "Translate model requests and responses.",
       },
       {
         id: "L5",
         title: "Guardrails & Policy",
-        desc: "Apply checks to inputs, actions, and outputs.",
+        desc: "Check inputs, actions, and returned outputs.",
       },
       {
         id: "L6",
         title: "Tools & Actions",
-        desc: "Execute tool requests and return structured results.",
+        desc: "Execute tool requests and return observations.",
       },
       {
         id: "L7",
         title: "Observability & Evaluation",
-        desc: "Trace runs and assess their behaviour and outcomes.",
+        desc: "Trace execution and evaluate behaviour.",
       },
     ]);
 
