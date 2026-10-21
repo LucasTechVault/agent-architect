@@ -302,14 +302,14 @@ export default function LandingPage() {
                   y1="0"
                   x2="12"
                   y2="35"
-                  stroke="#98A2B3"
-                  strokeWidth="1.5"
+                  stroke="#64748B"
+                  strokeWidth="1.75"
                 />
                 <path
                   d="M7 31 L12 39 L17 31"
                   fill="none"
-                  stroke="#98A2B3"
-                  strokeWidth="1.5"
+                  stroke="#64748B"
+                  strokeWidth="1.75"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
@@ -355,14 +355,14 @@ export default function LandingPage() {
                     y1="14"
                     x2="78"
                     y2="14"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                   />
                   <path
                     d="M73 9 L81 14 L73 19"
                     fill="none"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -404,14 +404,14 @@ export default function LandingPage() {
                     y1="12"
                     x2="78"
                     y2="12"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                   />
                   <path
                     d="M73 7 L81 12 L73 17"
                     fill="none"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -540,14 +540,14 @@ export default function LandingPage() {
                     y1="4"
                     x2="14"
                     y2="58"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                   />
                   <path
                     d="M9 53 L14 61 L19 53"
                     fill="none"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -590,14 +590,14 @@ export default function LandingPage() {
                     y1="12"
                     x2="10"
                     y2="12"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                   />
                   <path
                     d="M15 7 L7 12 L15 17"
                     fill="none"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -628,14 +628,14 @@ export default function LandingPage() {
                     y1="12"
                     x2="10"
                     y2="12"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                   />
                   <path
                     d="M15 7 L7 12 L15 17"
                     fill="none"
-                    stroke="#98A2B3"
-                    strokeWidth="1.5"
+                    stroke="#64748B"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
@@ -698,8 +698,8 @@ export default function LandingPage() {
                 y1="2"
                 x2="100"
                 y2="18"
-                stroke="#98A2B3"
-                strokeWidth="1.25"
+                stroke="#64748B"
+                strokeWidth="1.5"
                 strokeDasharray="3 3"
               />
               <line
@@ -707,8 +707,8 @@ export default function LandingPage() {
                 y1="2"
                 x2="300"
                 y2="32"
-                stroke="#98A2B3"
-                strokeWidth="1.25"
+                stroke="#64748B"
+                strokeWidth="1.5"
                 strokeDasharray="3 3"
               />
               <line
@@ -716,8 +716,8 @@ export default function LandingPage() {
                 y1="2"
                 x2="500"
                 y2="18"
-                stroke="#98A2B3"
-                strokeWidth="1.25"
+                stroke="#64748B"
+                strokeWidth="1.5"
                 strokeDasharray="3 3"
               />
               <line
@@ -725,15 +725,15 @@ export default function LandingPage() {
                 y1="18"
                 x2="500"
                 y2="18"
-                stroke="#98A2B3"
-                strokeWidth="1.25"
+                stroke="#64748B"
+                strokeWidth="1.5"
                 strokeDasharray="3 3"
               />
               <path
                 d="M296 28 L300 35 L304 28"
                 fill="none"
-                stroke="#98A2B3"
-                strokeWidth="1.25"
+                stroke="#64748B"
+                strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />

@@ -4696,10 +4696,10 @@ main.lp-main-root {
 
 .lp-root {
   --lp-bg: #FFFFFF;
-  --lp-text: #101828;
-  --lp-text-secondary: #667085;
-  --lp-border: #EAECF0;
-  --lp-border-strong: #D0D5DD;
+  --lp-text: #0F172A;
+  --lp-text-secondary: #334155;
+  --lp-border: #94A3B8;
+  --lp-border-strong: #475569;
   --lp-hover: #F8FAFC;
   --lp-accent: #4F46E5;
   --lp-accent-soft: #EEF2FF;
@@ -4710,18 +4710,19 @@ main.lp-main-root {
   background: var(--lp-bg);
   color: var(--lp-text);
   font-family: var(--lp-sans);
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
 }
 
-/* A. Slim Header (62px tall) */
+/* A. Slim Header (66px tall) */
 .lp-header {
-  height: 62px;
-  border-bottom: 1px solid var(--lp-border);
+  height: 66px;
+  border-bottom: 1.5px solid var(--lp-border);
   background: var(--lp-bg);
 }
 
 .lp-header-inner {
-  max-width: 1180px;
+  max-width: 1220px;
   height: 100%;
   margin: 0 auto;
   padding: 0 24px;
@@ -4732,7 +4733,7 @@ main.lp-main-root {
 }
 
 .lp-wordmark {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--lp-text);
@@ -4754,8 +4755,8 @@ main.lp-main-root {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13.5px;
-  font-weight: 500;
+  font-size: 15.5px;
+  font-weight: 600;
   color: var(--lp-text);
   text-decoration: none;
   padding: 6px 10px;
@@ -4773,13 +4774,14 @@ main.lp-main-root {
 .lp-nav-secondary {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   padding-left: 16px;
-  border-left: 1px solid var(--lp-border);
+  border-left: 1.5px solid var(--lp-border);
 }
 
 .lp-nav-secondary a {
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--lp-text-secondary);
   text-decoration: none;
   padding: 4px 2px;
@@ -4790,11 +4792,11 @@ main.lp-main-root {
   color: var(--lp-text);
 }
 
-/* Centred Content Area (~1,180px wide) */
+/* Centred Content Area (~1,220px wide) */
 .lp-container {
-  max-width: 1180px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 32px 24px 64px;
+  padding: 34px 24px 68px;
 }
 
 /* B. Short Introduction & Lightweight Progress Summary */
@@ -4808,7 +4810,7 @@ main.lp-main-root {
 }
 
 .lp-intro h1 {
-  font-size: 32px;
+  font-size: 38px;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.025em;
@@ -4817,26 +4819,26 @@ main.lp-main-root {
 }
 
 .lp-subtitle {
-  font-size: 15.5px;
+  font-size: 18px;
   line-height: 1.5;
   color: var(--lp-text-secondary);
   margin: 0;
 }
 
 .lp-progress-summary {
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.4;
   color: var(--lp-text-secondary);
 }
 
 .lp-progress-summary span {
   display: inline-block;
-  padding: 5px 11px;
+  padding: 6px 13px;
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 6px;
-  font-weight: 500;
-  color: var(--lp-text-secondary);
+  font-weight: 600;
+  color: var(--lp-text);
 }
 
 /* C. Architecture Map Layout (Regions A, B, C) */
@@ -4849,13 +4851,13 @@ main.lp-main-root {
 .lp-card {
   position: relative;
   background: var(--lp-bg);
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 8px;
-  padding: 15px 16px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .lp-card:hover {
@@ -4877,30 +4879,31 @@ main.lp-main-root {
 }
 
 .lp-layer-id {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--lp-text-secondary);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--lp-text);
   letter-spacing: 0.02em;
 }
 
 .lp-scope-note {
-  font-size: 12px;
+  font-size: 14.5px;
+  font-weight: 500;
   color: var(--lp-text-secondary);
   padding-left: 8px;
-  border-left: 1px solid var(--lp-border);
+  border-left: 1.5px solid var(--lp-border);
 }
 
 .lp-card-link {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   text-decoration: none;
   color: inherit;
   border-radius: 4px;
 }
 
 .lp-card-title {
-  font-size: 16.5px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1.35;
   color: var(--lp-text);
@@ -4912,8 +4915,8 @@ main.lp-main-root {
 }
 
 .lp-card-desc {
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.52;
   color: var(--lp-text-secondary);
   margin: 0;
 }
@@ -4926,15 +4929,15 @@ main.lp-main-root {
 .lp-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 26px;
-  padding: 0 8px;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   background: var(--lp-bg);
   color: var(--lp-text-secondary);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
@@ -4947,7 +4950,7 @@ main.lp-main-root {
 }
 
 .lp-status-pill.status-learning {
-  border-color: rgba(79, 70, 229, 0.35);
+  border-color: var(--lp-accent);
   background: var(--lp-accent-soft);
   color: var(--lp-accent);
 }
@@ -4967,12 +4970,12 @@ main.lp-main-root {
   top: calc(100% + 6px);
   right: 0;
   z-index: 40;
-  min-width: 140px;
+  min-width: 160px;
   background: var(--lp-bg);
-  border: 1px solid var(--lp-border-strong);
+  border: 1.5px solid var(--lp-border-strong);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -4983,9 +4986,9 @@ main.lp-main-root {
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 10px;
+  padding: 7px 11px;
   border-radius: 5px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 500;
   color: var(--lp-text-secondary);
   text-align: left;
@@ -5005,12 +5008,12 @@ main.lp-main-root {
 /* Region A — L1 Entry Card & "Initialize run" Connector */
 .lp-region-entry .lp-card,
 .lp-region-rail .lp-card {
-  padding: 15px 20px;
+  padding: 16px 20px;
 }
 
 .lp-connector-initialize {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 124px minmax(0, 1fr) 124px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 140px minmax(0, 1fr) 140px minmax(0, 1fr);
   padding: 0 22px;
 }
 
@@ -5020,7 +5023,7 @@ main.lp-main-root {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 42px;
+  height: 44px;
 }
 
 .lp-svg-v {
@@ -5030,17 +5033,17 @@ main.lp-main-root {
 }
 
 .lp-connector-label {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--lp-text-secondary);
   white-space: nowrap;
 }
 
 /* Region B — Agent Execution Loop Group */
 .lp-region-loop {
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 10px;
-  padding: 18px 22px 22px;
+  padding: 20px 22px 24px;
   background: var(--lp-bg);
 }
 
@@ -5050,11 +5053,11 @@ main.lp-main-root {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .lp-region-title {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--lp-text);
   letter-spacing: -0.01em;
@@ -5062,15 +5065,16 @@ main.lp-main-root {
 }
 
 .lp-loop-caption {
-  font-size: 12.5px;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--lp-text-secondary);
 }
 
 /* 3-Column x 2-Row Loop Grid with Dedicated Connector Channels */
 .lp-loop-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 124px minmax(0, 1fr) 124px minmax(0, 1fr);
-  grid-template-rows: auto 84px auto;
+  grid-template-columns: minmax(0, 1fr) 140px minmax(0, 1fr) 140px minmax(0, 1fr);
+  grid-template-rows: auto 90px auto;
   align-items: stretch;
 }
 
@@ -5160,7 +5164,7 @@ main.lp-main-root {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   padding: 0 4px;
 }
 
@@ -5190,7 +5194,7 @@ main.lp-main-root {
 }
 
 .lp-return-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--lp-accent);
   white-space: nowrap;
@@ -5198,15 +5202,15 @@ main.lp-main-root {
 
 /* L5 Inline Hook Markers */
 .lp-hook-marker {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12.5px;
+  font-weight: 600;
   line-height: 1.25;
   text-align: center;
-  color: var(--lp-text-secondary);
+  color: var(--lp-text);
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border);
-  border-radius: 4px;
-  padding: 2px 6px;
+  border: 1.5px solid var(--lp-border);
+  border-radius: 5px;
+  padding: 3px 7px;
   white-space: nowrap;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
@@ -5221,8 +5225,8 @@ main.lp-main-root {
 
 .lp-card-extra {
   margin-top: auto;
-  padding-top: 6px;
-  border-top: 1px solid var(--lp-border);
+  padding-top: 8px;
+  border-top: 1.5px solid var(--lp-border);
 }
 
 .lp-l5-hooks-row {
@@ -5232,10 +5236,10 @@ main.lp-main-root {
 }
 
 .lp-mini-hook {
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--lp-text-secondary);
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 4px;
   padding: 2px 6px;
   cursor: pointer;
@@ -5250,19 +5254,20 @@ main.lp-main-root {
 
 /* Center Loop Disclosure & Hint */
 .lp-cycle-hint {
-  font-size: 12px;
-  color: #98A2B3;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
   letter-spacing: 0.01em;
 }
 
 .lp-inline-disclosure {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border-strong);
+  border: 1.5px solid var(--lp-border-strong);
   border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 12.5px;
+  padding: 10px 14px;
+  font-size: 14.5px;
   color: var(--lp-text);
 }
 
@@ -5275,14 +5280,14 @@ main.lp-main-root {
 }
 
 .lp-disclosure-head button {
-  font-size: 11.5px;
+  font-size: 13.5px;
   color: var(--lp-accent);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .lp-inline-disclosure p {
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 14px;
+  line-height: 1.48;
   color: var(--lp-text-secondary);
   margin: 0;
 }
@@ -5290,17 +5295,17 @@ main.lp-main-root {
 .lp-disclosure-list {
   margin: 0;
   padding-left: 16px;
-  font-size: 11.5px;
+  font-size: 13.5px;
   color: var(--lp-text-secondary);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 /* Secondary Unnumbered Loop-Control Gate Card */
 .lp-gate-card {
   background: var(--lp-hover);
-  border: 1px dashed var(--lp-border-strong);
+  border: 1.5px dashed var(--lp-border-strong);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -5314,14 +5319,14 @@ main.lp-main-root {
 }
 
 .lp-gate-label {
-  font-size: 12.5px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--lp-text);
 }
 
 .lp-gate-info-btn {
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 13.5px;
+  font-weight: 600;
   color: var(--lp-accent);
   padding: 2px 6px;
   border-radius: 4px;
@@ -5332,17 +5337,17 @@ main.lp-main-root {
 }
 
 .lp-gate-desc {
-  font-size: 12.5px;
-  line-height: 1.4;
+  font-size: 14.5px;
+  line-height: 1.45;
   color: var(--lp-text-secondary);
   margin: 0;
 }
 
 .lp-gate-outcomes {
   margin: 0;
-  padding-left: 16px;
-  font-size: 12px;
-  line-height: 1.45;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.48;
   color: var(--lp-text-secondary);
 }
 
@@ -5356,8 +5361,8 @@ main.lp-main-root {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px 0 6px;
-  gap: 2px;
+  padding: 4px 0 8px;
+  gap: 3px;
 }
 
 .lp-svg-telemetry {
@@ -5368,8 +5373,8 @@ main.lp-main-root {
 }
 
 .lp-telemetry-label {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--lp-text-secondary);
 }
 
@@ -5446,8 +5451,8 @@ main.lp-main-root {
 
   .lp-grid-conn::after {
     content: "↓";
-    font-size: 14px;
-    color: #98A2B3;
+    font-size: 15px;
+    color: #475569;
     line-height: 1;
   }
 
@@ -5456,13 +5461,13 @@ main.lp-main-root {
     align-items: center;
     justify-content: center;
     margin-top: 12px;
-    padding: 10px 12px;
+    padding: 11px 14px;
     border-radius: 6px;
-    border: 1px dashed rgba(79, 70, 229, 0.4);
+    border: 1.5px dashed rgba(79, 70, 229, 0.65);
     background: var(--lp-accent-soft);
     color: var(--lp-accent);
-    font-size: 12.5px;
-    font-weight: 500;
+    font-size: 14.5px;
+    font-weight: 600;
     text-align: center;
   }
 }
@@ -5470,7 +5475,7 @@ main.lp-main-root {
 @media (max-width: 680px) {
   .lp-header {
     height: auto;
-    min-height: 58px;
+    min-height: 60px;
     padding: 10px 0;
   }
 
@@ -5503,11 +5508,11 @@ main.lp-main-root {
   }
 
   .lp-intro h1 {
-    font-size: 26px;
+    font-size: 29px;
   }
 
   .lp-subtitle {
-    font-size: 14.5px;
+    font-size: 16px;
   }
 
   .lp-region-loop {
@@ -5520,7 +5525,7 @@ main.lp-main-root {
    ========================================================================== */
 
 .l1-container {
-  max-width: 1120px;
+  max-width: 1180px;
   padding: 28px 32px 64px;
 }
 
@@ -5535,7 +5540,7 @@ main.lp-main-root {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-weight: 500;
   color: var(--lp-text-secondary);
   transition: color 0.15s ease;
@@ -5546,12 +5551,12 @@ main.lp-main-root {
 }
 
 .l1-header-divider {
-  color: #D0D5DD;
-  font-size: 13px;
+  color: var(--lp-border-strong);
+  font-size: 15px;
 }
 
 .l1-header-current {
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-weight: 600;
   color: var(--lp-text);
 }
@@ -5563,8 +5568,8 @@ main.lp-main-root {
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--lp-border);
-  margin-bottom: 20px;
+  border-bottom: 1.5px solid var(--lp-border);
+  margin-bottom: 22px;
 }
 
 .l1-hero-copy {
@@ -5581,7 +5586,7 @@ main.lp-main-root {
 
 .l1-hero-copy h1 {
   font-family: var(--lp-font);
-  font-size: 28px;
+  font-size: 35px;
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -5592,9 +5597,9 @@ main.lp-main-root {
 /* Composable Conceptual Model Framing Banner */
 .l1-composable-banner {
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 10px;
-  padding: 16px 20px;
+  padding: 18px 22px;
   margin-bottom: 28px;
   display: flex;
   flex-direction: column;
@@ -5602,7 +5607,7 @@ main.lp-main-root {
 }
 
 .l1-composable-lead {
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1.55;
   color: var(--lp-text-secondary);
   margin: 0;
@@ -5621,40 +5626,40 @@ main.lp-main-root {
 .l1-roles-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--lp-border);
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1.5px solid var(--lp-border);
 }
 
 .l1-role-item {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
 .l1-role-item strong {
-  font-size: 12.5px;
+  font-size: 15.5px;
   font-weight: 600;
   color: var(--lp-text);
 }
 
 .l1-role-item span {
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 14.5px;
+  line-height: 1.5;
   color: var(--lp-text-secondary);
 }
 
 /* Sections A, B, C */
 .l1-section {
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 10px;
-  padding: 20px 22px 22px;
+  padding: 22px 24px 24px;
   background: var(--lp-bg);
-  margin-bottom: 22px;
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .l1-section-header {
@@ -5667,17 +5672,17 @@ main.lp-main-root {
 
 .l1-section-step {
   display: block;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
   text-transform: uppercase;
   color: var(--lp-accent);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 
 .l1-section-header h2 {
   font-family: var(--lp-font);
-  font-size: 18px;
+  font-size: 23px;
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--lp-text);
@@ -5685,8 +5690,8 @@ main.lp-main-root {
 }
 
 .l1-section-note {
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 15.5px;
+  line-height: 1.5;
   color: var(--lp-text-secondary);
   margin: 0;
 }
@@ -5695,18 +5700,18 @@ main.lp-main-root {
 .l1-cards-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .l1-choice-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 7px;
   text-align: left;
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-radius: 8px;
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   background: var(--lp-bg);
   cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
@@ -5720,27 +5725,27 @@ main.lp-main-root {
 .l1-choice-card.is-selected {
   border-color: var(--lp-accent);
   background: var(--lp-hover);
-  box-shadow: 0 0 0 1px var(--lp-accent);
+  box-shadow: 0 0 0 1.5px var(--lp-accent);
 }
 
 .l1-aspect-num {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--lp-text-secondary);
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 2px 8px;
 }
 
 .l1-choice-card.is-selected .l1-aspect-num {
   color: var(--lp-accent);
   background: var(--lp-accent-soft);
-  border-color: rgba(79, 70, 229, 0.25);
+  border-color: rgba(79, 70, 229, 0.5);
 }
 
 .l1-choice-title {
-  font-size: 15px;
+  font-size: 18.5px;
   font-weight: 600;
   line-height: 1.35;
   color: var(--lp-text);
@@ -5751,21 +5756,21 @@ main.lp-main-root {
 }
 
 .l1-choice-summary {
-  font-size: 13.5px;
-  line-height: 1.48;
+  font-size: 15.5px;
+  line-height: 1.52;
   color: var(--lp-text-secondary);
 }
 
 /* Single Inline Explanation Panel */
 .l1-explanation-panel {
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border-strong);
-  border-left: 3px solid var(--lp-accent);
+  border: 1.5px solid var(--lp-border-strong);
+  border-left: 4px solid var(--lp-accent);
   border-radius: 8px;
-  padding: 14px 18px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .l1-explanation-head {
@@ -5777,53 +5782,54 @@ main.lp-main-root {
 }
 
 .l1-explanation-head strong {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--lp-text);
 }
 
 .l1-explanation-tag {
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 13.5px;
+  font-weight: 600;
   color: var(--lp-accent);
   background: var(--lp-accent-soft);
-  padding: 2px 8px;
+  border: 1px solid rgba(79, 70, 229, 0.45);
+  padding: 3px 10px;
   border-radius: 999px;
 }
 
 .l1-explanation-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .l1-field-label {
   display: block;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--lp-text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .l1-explanation-grid p,
 .l1-explanation-single {
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 15.5px;
+  line-height: 1.55;
   color: var(--lp-text);
   margin: 0;
 }
 
 /* Section B — Compact Example Architecture Diagram */
 .l1-example-diagram {
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 8px;
-  padding: 14px 16px 18px;
+  padding: 16px 18px 20px;
   background: var(--lp-bg);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .l1-example-header {
@@ -5832,18 +5838,18 @@ main.lp-main-root {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 6px 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--lp-border);
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--lp-border);
 }
 
 .l1-example-title {
-  font-size: 12.5px;
+  font-size: 15.5px;
   font-weight: 600;
   color: var(--lp-text);
 }
 
 .l1-example-disclaimer {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--lp-text-secondary);
 }
 
@@ -5854,7 +5860,7 @@ main.lp-main-root {
     44px
     minmax(0, 1fr)
     44px
-    minmax(0, 1.3fr)
+    minmax(0, 1.35fr)
     44px
     minmax(0, 1fr)
     44px
@@ -5863,42 +5869,42 @@ main.lp-main-root {
 }
 
 .l1-diag-node {
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 7px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--lp-bg);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .l1-diag-node strong {
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--lp-text);
   line-height: 1.3;
 }
 
 .l1-node-kind {
-  font-size: 10.5px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.025em;
   color: var(--lp-text-secondary);
 }
 
 .l1-node-sub {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--lp-text-secondary);
-  line-height: 1.35;
+  line-height: 1.42;
 }
 
 .l1-diag-node.is-highlighted {
   border-color: var(--lp-accent);
   background: var(--lp-hover);
-  box-shadow: 0 0 0 1px var(--lp-accent);
+  box-shadow: 0 0 0 1.5px var(--lp-accent);
 }
 
 .l1-diag-node.is-highlighted .l1-node-kind,
@@ -5911,20 +5917,21 @@ main.lp-main-root {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
-  padding-top: 6px;
-  border-top: 1px dashed var(--lp-border-strong);
-  font-size: 11.5px;
+  gap: 5px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1.5px dashed var(--lp-border-strong);
+  font-size: 13.5px;
   color: var(--lp-text-secondary);
 }
 
 .l1-return-pill {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--lp-accent);
   background: var(--lp-accent-soft);
-  padding: 1px 6px;
+  border: 1px solid rgba(79, 70, 229, 0.45);
+  padding: 2px 7px;
   border-radius: 4px;
 }
 
@@ -5932,8 +5939,8 @@ main.lp-main-root {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 64px;
-  color: #98A2B3;
+  height: 74px;
+  color: #475569;
   transition: color 0.15s ease;
 }
 
@@ -5958,7 +5965,7 @@ main.lp-main-root {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  color: #98A2B3;
+  color: #475569;
 }
 
 .l1-delegation-branch.is-highlighted {
@@ -5970,25 +5977,25 @@ main.lp-main-root {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 3px 0;
+  padding: 4px 0;
 }
 
 .l1-svg-delegation {
   width: 56px;
-  height: 32px;
+  height: 34px;
   flex-shrink: 0;
   display: block;
 }
 
 .l1-delegation-label {
-  font-size: 11px;
-  line-height: 1.25;
+  font-size: 13px;
+  line-height: 1.3;
   color: var(--lp-text-secondary);
 }
 
 .l1-delegation-branch.is-highlighted .l1-delegation-label {
   color: var(--lp-accent);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .l1-node-specialist {
@@ -5999,17 +6006,17 @@ main.lp-main-root {
 
 /* Section C — State & Context Implications */
 .l1-active-implications {
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 8px;
   background: var(--lp-hover);
-  padding: 12px 16px;
+  padding: 14px 18px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 .l1-active-imp-head {
-  font-size: 12.5px;
+  font-size: 15px;
   color: var(--lp-text-secondary);
 }
 
@@ -6021,12 +6028,12 @@ main.lp-main-root {
 .l1-active-imp-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .l1-imp-cell p {
-  font-size: 13.5px;
-  line-height: 1.48;
+  font-size: 15.5px;
+  line-height: 1.54;
   color: var(--lp-text);
   margin: 0;
 }
@@ -6034,17 +6041,17 @@ main.lp-main-root {
 .l1-implications-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .l1-implication-card {
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   background: var(--lp-bg);
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .l1-imp-top {
@@ -6055,25 +6062,25 @@ main.lp-main-root {
 }
 
 .l1-imp-top strong {
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--lp-text);
 }
 
 .l1-imp-target {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--lp-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--lp-text);
   background: var(--lp-hover);
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 2px 7px;
   white-space: nowrap;
 }
 
 .l1-implication-card p {
-  font-size: 13px;
-  line-height: 1.48;
+  font-size: 15px;
+  line-height: 1.54;
   color: var(--lp-text-secondary);
   margin: 0;
 }
@@ -6083,21 +6090,22 @@ main.lp-main-root {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  padding: 2px 0;
+  padding: 4px 0;
 }
 
 .l1-concept-branch {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--lp-text-secondary);
 }
 
 .l1-svg-concept {
-  width: 20px;
-  height: 28px;
+  width: 22px;
+  height: 30px;
   display: block;
 }
 
@@ -6111,12 +6119,12 @@ main.lp-main-root {
 .l1-destination-card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
+  gap: 7px;
+  padding: 16px 18px;
   border-radius: 8px;
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   background: var(--lp-bg);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .l1-destination-card:hover {
@@ -6135,14 +6143,14 @@ main.lp-main-root {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--lp-accent);
 }
 
 .l1-destination-card h3 {
   font-family: var(--lp-font);
-  font-size: 15.5px;
+  font-size: 18.5px;
   font-weight: 600;
   color: var(--lp-text);
   margin: 0;
@@ -6153,8 +6161,8 @@ main.lp-main-root {
 }
 
 .l1-destination-card p {
-  font-size: 13.5px;
-  line-height: 1.45;
+  font-size: 15.5px;
+  line-height: 1.5;
   color: var(--lp-text-secondary);
   margin: 0;
 }
@@ -6187,7 +6195,7 @@ main.lp-main-root {
 
   .l1-diag-conn::after {
     content: "↓";
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1;
   }
 
@@ -6221,6 +6229,6 @@ main.lp-main-root {
   }
 
   .l1-hero-copy h1 {
-    font-size: 24px;
+    font-size: 26px;
   }
 }

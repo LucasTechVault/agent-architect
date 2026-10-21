@@ -679,15 +679,15 @@ export default function L1OrchestrationDrilldown() {
                   y1="0"
                   x2="12"
                   y2="25"
-                  stroke="#98A2B3"
-                  strokeWidth="1.25"
+                  stroke="#64748B"
+                  strokeWidth="1.5"
                   strokeDasharray="3 3"
                 />
                 <path
                   d="M8 21 L12 28 L16 21"
                   fill="none"
-                  stroke="#98A2B3"
-                  strokeWidth="1.25"
+                  stroke="#64748B"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
@@ -701,15 +701,15 @@ export default function L1OrchestrationDrilldown() {
                   y1="0"
                   x2="12"
                   y2="25"
-                  stroke="#98A2B3"
-                  strokeWidth="1.25"
+                  stroke="#64748B"
+                  strokeWidth="1.5"
                   strokeDasharray="3 3"
                 />
                 <path
                   d="M8 21 L12 28 L16 21"
                   fill="none"
-                  stroke="#98A2B3"
-                  strokeWidth="1.25"
+                  stroke="#64748B"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
