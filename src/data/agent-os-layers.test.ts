@@ -24,6 +24,26 @@ import {
   l1ComposableRolesSummary,
   l1CorePrinciple,
 } from "./l1-orchestration";
+import {
+  l3ContextAssemblyStages,
+  l3ContextSources,
+  l3CrossLayerLinks,
+  l3IntroStatement,
+  l3OfflinePreparationStages,
+  l3OnlineRetrievalStages,
+  l3PipelineAccessProvenanceNote,
+  l3PrefixCachingNote,
+  l3SharedContextPrinciple,
+} from "./l3-context-memory";
+import {
+  l6CrossLayerLinks,
+  l6ExampleAdapterComposition,
+  l6ExecutionFlowStages,
+  l6IntegrationOptions,
+  l6IntroStatement,
+  l6OutcomeCategories,
+  l6SharedOwnershipPrinciple,
+} from "./l6-tools-actions";
 
 describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
   it("defines all 7 layers (L1..L7) with 3-Box Boundary Flows, 3 Invariants, and 10% Contracts", () => {
@@ -306,5 +326,162 @@ describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
         i.detail.includes("event sourcing"),
       ),
     ).toBe(true);
+  });
+
+  it("models L3 Context & Memory with 4 context sources, 6 offline stages, 7 online stages, and 5 assembly steps", () => {
+    expect(l3IntroStatement).toBe(
+      "Working context, retrieved knowledge, skills, and long-term memory provide different inputs. L3 selects and assembles them within the model’s context budget.",
+    );
+    expect(l3SharedContextPrinciple).toContain("untrusted data inputs");
+    expect(l3PipelineAccessProvenanceNote).toContain("Access scope and provenance");
+    expect(l3PrefixCachingNote).toContain(
+      "Stable prefixes can improve cache reuse when supported by the serving implementation.",
+    );
+
+    expect(
+      l3ContextSources.map((s) => ({
+        id: s.id,
+        title: s.title,
+        subtitle: s.subtitle,
+      })),
+    ).toEqual([
+      {
+        id: "working-context",
+        title: "Working context & turn history",
+        subtitle:
+          "Carry forward the goal, relevant observations, and current task context.",
+      },
+      {
+        id: "retrieved-knowledge",
+        title: "Retrieved knowledge · RAG",
+        subtitle: "Bring authorised external evidence into the current task.",
+      },
+      {
+        id: "skills-procedures",
+        title: "Skills & procedures",
+        subtitle:
+          "Load reusable instructions and supporting resources when relevant.",
+      },
+      {
+        id: "cross-session-memory",
+        title: "Cross-session memory",
+        subtitle: "Reuse relevant facts and past experiences across runs.",
+      },
+    ]);
+
+    expect(l3OfflinePreparationStages).toHaveLength(6);
+    expect(l3OfflinePreparationStages.map((s) => s.title)).toEqual([
+      "Landing",
+      "Register & deduplicate",
+      "Parse",
+      "Chunk",
+      "Enrich",
+      "Embed, index & publish",
+    ]);
+
+    expect(l3OnlineRetrievalStages).toHaveLength(7);
+    expect(l3OnlineRetrievalStages.map((s) => s.title)).toEqual([
+      "Form the retrieval request",
+      "Retrieve authorised candidates",
+      "Fuse & deduplicate",
+      "Rerank",
+      "Assemble evidence",
+      "Generate through L4",
+      "Validate references & render citations",
+    ]);
+    expect(l3OnlineRetrievalStages[5].handoffLayerId).toBe("L4");
+
+    expect(l3ContextAssemblyStages).toHaveLength(5);
+    expect(l3ContextAssemblyStages.map((s) => s.title)).toEqual([
+      "Select relevant inputs",
+      "Check scope and organise evidence",
+      "Budget, deduplicate, and compact",
+      "Render the canonical context",
+      "Hand off to L4",
+    ]);
+
+    expect(l3CrossLayerLinks.map((l) => l.layerId)).toEqual([
+      "L2",
+      "L4",
+      "L5",
+      "L6",
+      "L7",
+    ]);
+  });
+
+  it("models L6 Tools & Actions with 3 integration cards, 5 outcome categories, and 6 execution flow stages", () => {
+    expect(l6IntroStatement).toBe(
+      "Domain interfaces, integration protocols, and execution environments solve different problems. They can be combined behind the same controlled tool boundary.",
+    );
+    expect(l6SharedOwnershipPrinciple).toContain("model-provider failures belong to L4");
+
+    expect(
+      l6IntegrationOptions.map((o) => ({
+        id: o.id,
+        title: o.title,
+        subtitle: o.subtitle,
+      })),
+    ).toEqual([
+      {
+        id: "enterprise-facades",
+        title: "Enterprise APIs & service façades",
+        subtitle: "Expose clear domain operations through stable contracts.",
+      },
+      {
+        id: "mcp-adapters",
+        title: "MCP client adapters",
+        subtitle:
+          "Connect standard capabilities to the application’s interfaces.",
+      },
+      {
+        id: "isolated-environments",
+        title: "Isolated code & browser environments",
+        subtitle: "Execute code or browser work within explicit boundaries.",
+      },
+    ]);
+
+    expect(
+      l6IntegrationOptions[1].mcpPrimitives?.map((p) => p.primitive),
+    ).toEqual(["Tools", "Resources", "Prompts"]);
+    expect(l6IntegrationOptions[2].sandboxLifecycle).toEqual([
+      "Provision",
+      "Execute",
+      "Collect results",
+      "Clean up",
+    ]);
+
+    expect(l6OutcomeCategories).toHaveLength(5);
+    expect(l6OutcomeCategories.map((o) => o.title)).toEqual([
+      "Safe transient failure",
+      "Correctable input or generated code",
+      "Unknown execution outcome",
+      "Denied, paused, or cancelled",
+      "Contract or configuration failure",
+    ]);
+
+    expect(l6ExecutionFlowStages).toHaveLength(6);
+    expect(l6ExecutionFlowStages.map((s) => s.title)).toEqual([
+      "Proposed call",
+      "Validate & authorise",
+      "Prepare the operation",
+      "Execute through the adapter",
+      "Check & record the result",
+      "Return the observation",
+    ]);
+    expect(l6ExecutionFlowStages[3].hasExampleComposition).toBe(true);
+    expect(l6ExampleAdapterComposition.chain).toEqual([
+      "Internal port",
+      "MCP client adapter",
+      "MCP server",
+      "Enterprise API or sandbox worker",
+    ]);
+
+    expect(l6CrossLayerLinks.map((l) => l.layerId)).toEqual([
+      "L2",
+      "L3",
+      "L4",
+      "L5",
+      "L7",
+    ]);
   });
 });

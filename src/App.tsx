@@ -38,6 +38,8 @@ import Roadmap from "./components/Roadmap";
 import AgentOsBlueprint from "./components/AgentOsBlueprint";
 import LandingPage from "./components/LandingPage";
 import L1OrchestrationDrilldown from "./components/L1OrchestrationDrilldown";
+import L3ContextMemoryDrilldown from "./components/L3ContextMemoryDrilldown";
+import L6ToolsActionsDrilldown from "./components/L6ToolsActionsDrilldown";
 import type { LayerId } from "./data/agent-os-layers";
 import {
   completion,
@@ -232,6 +234,20 @@ export default function App() {
       return (
         <main id="main-content" tabIndex={-1} ref={main} className="lp-main-root">
           <L1OrchestrationDrilldown />
+        </main>
+      );
+    }
+    if (initialLayerId === "L3" && viewMode !== "reference") {
+      return (
+        <main id="main-content" tabIndex={-1} ref={main} className="lp-main-root">
+          <L3ContextMemoryDrilldown />
+        </main>
+      );
+    }
+    if (initialLayerId === "L6" && viewMode !== "reference") {
+      return (
+        <main id="main-content" tabIndex={-1} ref={main} className="lp-main-root">
+          <L6ToolsActionsDrilldown />
         </main>
       );
     }
