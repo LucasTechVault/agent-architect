@@ -1,10 +1,10 @@
-# ADR-0002: Dual-Lens 7-Layer Agent OS Blueprint and 60s Cold Recall Gate
-Status: Accepted by owner at front-page blueprint checkpoint.
+# ADR-0002: Minimalist 7-Concept Landing Overview and Detailed Blueprint Vault
+Status: Accepted by owner at landing-page redesign checkpoint.
 Date: 2026-10-21.
-Scope: Front-page 7-Layer Agent OS Blueprint (L1–L7), Dual-Lens mode switcher, and Cold Recall Mastery Vault in agent-architect.
-Context: Drawing L1–L7 as a one-way linear stack hid the cyclic L2..L6 observation return arc, multi-point L5 hooks, separated L4 vs. L6 error taxonomies, and the paradox between runtime execution order and bottom-up build order.
-Decision: Render the Agent Architect front page in an FT Editorial Warm Paper dual-lens layout (Mode 1: L1 Entry + Cyclic L2..L6 Loop + Cross-Cutting L7 Rail; Mode 2: 4-Step Build Order starting with L7+L6) gated by a 60s Cold Recall test.
-Rejected Alternative: Reject a linear 1-to-7 waterfall diagram, physics-simulation node graphs, or passive 1-click mastery checkboxes that bypass active recall of port invariants.
-Risk: Enforcing active 60s Cold Recall before locking in layer mastery adds deliberate friction compared to passive reading, requiring clear side-by-side rubric feedback.
-Implementation: src/data/agent-os-layers.ts, src/components/AgentOsBlueprint.tsx, src/App.tsx, src/styles.css, and src/data/agent-os-layers.test.ts.
-Verification: Vitest suite (61 tests across 4 files), TypeScript strict check (npm run typecheck), and production bundle build (npm run build) pass.
+Scope: Minimalist white landing page (src/components/LandingPage.tsx) and detailed 7-Layer Agent OS Blueprint (src/components/AgentOsBlueprint.tsx) in agent-architect.
+Context: Exposing the full architecture diagram, runtime simulator, code contracts, invariants, and 60s recall gate simultaneously on the home screen created high cognitive load when scanning the 7 core concepts.
+Decision: Make a clean white minimalist 7-concept overview (#overview) the default home screen with persistent manual study statuses (Not started / Learning / Reviewed), linking each row to its deep-dive layer in #blueprint?layer=L1..L7.
+Rejected Alternative: Reject keeping the dense split-screen blueprint as the initial landing screen or coupling manual study status to assessment-verified recall mastery.
+Risk: Maintaining separate localStorage keys for manual study status and recall-verified mastery requires clear UI labels so "Reviewed" is never mistaken for verified competence.
+Implementation: src/components/LandingPage.tsx, src/components/AgentOsBlueprint.tsx, src/data/agent-os-layers.ts, src/App.tsx, src/styles.css, and src/data/agent-os-layers.test.ts.
+Verification: Vitest suite (63 tests across 4 files), TypeScript strict check (npm run typecheck), and production bundle build (npm run build) pass.

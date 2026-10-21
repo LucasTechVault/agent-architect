@@ -36,6 +36,8 @@ import EngineeringSheet from "./components/EngineeringSheet";
 import SpecProperties, { PropertyGrid } from "./components/SpecProperties";
 import Roadmap from "./components/Roadmap";
 import AgentOsBlueprint from "./components/AgentOsBlueprint";
+import LandingPage from "./components/LandingPage";
+import type { LayerId } from "./data/agent-os-layers";
 import {
   completion,
   decisionKey,
@@ -60,11 +62,21 @@ const icons = {
 const tabs = ["architecture", "milestones", "decisions"] as const;
 type DetailTab = (typeof tabs)[number];
 const nav = [
-  { id: "blueprint", label: "7-Layer OS Blueprint", icon: Box },
+  { id: "overview", label: "Concept overview", icon: BookOpen },
+  { id: "blueprint", label: "Detailed blueprint", icon: Box },
   { id: "archetypes", label: "Agent archetypes", icon: LayoutGrid },
   { id: "map", label: "System map", icon: Network },
   { id: "roadmap", label: "Build roadmap", icon: ListChecks },
 ];
+const validLayerIds = new Set<LayerId>([
+  "L1",
+  "L2",
+  "L3",
+  "L4",
+  "L5",
+  "L6",
+  "L7",
+]);
 function RoleIcon({ agent, size = 17 }: { agent: Archetype; size?: number }) {
   const Icon = icons[agent.id];
   return (
@@ -96,7 +108,7 @@ function readInitial() {
     };
   }
 }
-const currentRoute = () => window.location.hash.slice(1) || "blueprint";
+const currentRoute = () => window.location.hash.slice(1) || "overview";
 function routeFor(agent: Archetype, tab: DetailTab, block?: string) {
   return `#agent/${agent.id}?tab=${tab}${block ? `&block=${block}` : ""}`;
 }
@@ -203,10 +215,20 @@ export default function App() {
     }
     if (input.current) input.current.value = "";
   }
+  if (path === "overview") {
+    return (
+      <main id="main-content" tabIndex={-1} ref={main} className="lp-main-root">
+        <LandingPage />
+      </main>
+    );
+  }
   if (path === "blueprint") {
+    const rawLayer = query.get("layer") as LayerId | null;
+    const initialLayerId =
+      rawLayer && validLayerIds.has(rawLayer) ? rawLayer : undefined;
     return (
       <main id="main-content" tabIndex={-1} ref={main} className="ft-blueprint-root">
-        <AgentOsBlueprint />
+        <AgentOsBlueprint initialLayerId={initialLayerId} />
       </main>
     );
   }

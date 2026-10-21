@@ -1,5 +1,55 @@
 export type LayerId = "L1" | "L2" | "L3" | "L4" | "L5" | "L6" | "L7";
 
+export type StudyStatus = "Not started" | "Learning" | "Reviewed";
+
+export const STUDY_STATUS_OPTIONS: readonly StudyStatus[] = [
+  "Not started",
+  "Learning",
+  "Reviewed",
+];
+
+export type ConceptStudyState = Record<LayerId, StudyStatus>;
+
+export const CONCEPT_STUDY_STORAGE_KEY = "agent-architect.concept-study-status.v1";
+
+export function createInitialConceptStudyState(): ConceptStudyState {
+  return {
+    L1: "Not started",
+    L2: "Not started",
+    L3: "Not started",
+    L4: "Not started",
+    L5: "Not started",
+    L6: "Not started",
+    L7: "Not started",
+  };
+}
+
+export function loadConceptStudyState(): ConceptStudyState {
+  try {
+    const raw = localStorage.getItem(CONCEPT_STUDY_STORAGE_KEY);
+    if (!raw) return createInitialConceptStudyState();
+    const parsed = JSON.parse(raw) as Partial<Record<LayerId, unknown>>;
+    const base = createInitialConceptStudyState();
+    for (const id of ["L1", "L2", "L3", "L4", "L5", "L6", "L7"] as const) {
+      const val = parsed?.[id];
+      if (
+        val === "Not started" ||
+        val === "Learning" ||
+        val === "Reviewed"
+      ) {
+        base[id] = val;
+      }
+    }
+    return base;
+  } catch {
+    return createInitialConceptStudyState();
+  }
+}
+
+export function countReviewedConcepts(state: ConceptStudyState): number {
+  return Object.values(state).filter((status) => status === "Reviewed").length;
+}
+
 export interface BoundaryFlow {
   upstream: string;
   port: string;
@@ -16,6 +66,8 @@ export interface EnforcementHook {
 export interface AgentOsLayer {
   id: LayerId;
   number: number;
+  landingTitle: string;
+  landingDescription: string;
   title: string;
   shortTitle: string;
   subsystemTag: string;
@@ -33,6 +85,34 @@ export interface AgentOsLayer {
   contractCode: string;
   recallKeywords: string[];
 }
+
+export interface ConceptGroup {
+  id: "entry" | "loop" | "rail";
+  label: string;
+  rangeLabel: string;
+  layerIds: LayerId[];
+}
+
+export const conceptGroups: ConceptGroup[] = [
+  {
+    id: "entry",
+    label: "Entry control",
+    rangeLabel: "L1",
+    layerIds: ["L1"],
+  },
+  {
+    id: "loop",
+    label: "Agent execution",
+    rangeLabel: "L2–L6",
+    layerIds: ["L2", "L3", "L4", "L5", "L6"],
+  },
+  {
+    id: "rail",
+    label: "Cross-cutting",
+    rangeLabel: "L7",
+    layerIds: ["L7"],
+  },
+];
 
 export interface LoopTerminationCondition {
   id: string;
@@ -114,6 +194,9 @@ export const agentOsLayers: AgentOsLayer[] = [
   {
     id: "L1",
     number: 1,
+    landingTitle: "Orchestration",
+    landingDescription:
+      "Decide how an agent run starts and coordinates its work.",
     title: "L1 · Topology & Orchestration",
     shortTitle: "Topology & Orchestration",
     subsystemTag: "Entry Control Plane",
@@ -169,6 +252,9 @@ export interface OrchestrationTopologyPort {
   {
     id: "L2",
     number: 2,
+    landingTitle: "Runtime & State",
+    landingDescription:
+      "Manage execution state, budgets, checkpoints, and recovery.",
     title: "L2 · Durable Runtime & Idempotency",
     shortTitle: "Durable Runtime & Idempotency",
     subsystemTag: "Kernel",
@@ -230,6 +316,9 @@ export interface DurableRuntimeKernelPort<State, Event> {
   {
     id: "L3",
     number: 3,
+    landingTitle: "Context & Memory",
+    landingDescription:
+      "Prepare the information the model needs for each step.",
     title: "L3 · Context MMU & PromptRenderer",
     shortTitle: "Context MMU & PromptRenderer",
     subsystemTag: "Memory / MMU",
@@ -289,6 +378,9 @@ export interface PromptRendererPort<State> {
   {
     id: "L4",
     number: 4,
+    landingTitle: "Model Gateway",
+    landingDescription:
+      "Connect the runtime to models through a consistent interface.",
     title: "L4 · ModelGateway & Constrained Decoding",
     shortTitle: "ModelGateway & Decoding",
     subsystemTag: "Compute Engine",
@@ -350,6 +442,8 @@ export interface ModelGatewayPort {
   {
     id: "L5",
     number: 5,
+    landingTitle: "Guardrails & Policy",
+    landingDescription: "Apply checks to inputs, actions, and outputs.",
     title: "L5 · Multi-Point Guardrails & Policy",
     shortTitle: "Multi-Point Guardrails",
     subsystemTag: "3 Enforcement Hooks",
@@ -405,6 +499,9 @@ export interface GuardrailPolicyPort {
   {
     id: "L6",
     number: 6,
+    landingTitle: "Tools & Actions",
+    landingDescription:
+      "Execute tool requests and return structured results.",
     title: "L6 · Hexagonal Tools & Service Facade",
     shortTitle: "Hexagonal Tools & Facade",
     subsystemTag: "I/O Drivers",
@@ -468,6 +565,9 @@ export interface ToolExecutionPort {
   {
     id: "L7",
     number: 7,
+    landingTitle: "Observability & Evaluation",
+    landingDescription:
+      "Trace runs and assess their behaviour and outcomes.",
     title: "L7 · Observability & Verification Bus",
     shortTitle: "Observability & Verification Bus",
     subsystemTag: "Cross-Cutting Foundation Rail",

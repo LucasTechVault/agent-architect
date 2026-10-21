@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   agentOsLayers,
   buildOrderPhases,
+  CONCEPT_STUDY_STORAGE_KEY,
+  conceptGroups,
+  countReviewedConcepts,
+  createInitialConceptStudyState,
   l5EnforcementHooks,
+  loadConceptStudyState,
   loopSimulationSteps,
   loopTerminationConditions,
 } from "./agent-os-layers";
@@ -122,6 +127,111 @@ describe("7-Layer Agent OS Blueprint Data & Invariant Recall Vault", () => {
       );
       const loaded = loadLayerMastery();
       expect(loaded.L2.lockedIn).toBe(false);
+    } finally {
+      Object.defineProperty(globalThis, "localStorage", {
+        value: originalStorage,
+        configurable: true,
+      });
+    }
+  });
+
+  it("defines landing-page titles, descriptions, and groupings for all 7 concepts", () => {
+    expect(
+      agentOsLayers.map((l) => ({
+        id: l.id,
+        title: l.landingTitle,
+        desc: l.landingDescription,
+      })),
+    ).toEqual([
+      {
+        id: "L1",
+        title: "Orchestration",
+        desc: "Decide how an agent run starts and coordinates its work.",
+      },
+      {
+        id: "L2",
+        title: "Runtime & State",
+        desc: "Manage execution state, budgets, checkpoints, and recovery.",
+      },
+      {
+        id: "L3",
+        title: "Context & Memory",
+        desc: "Prepare the information the model needs for each step.",
+      },
+      {
+        id: "L4",
+        title: "Model Gateway",
+        desc: "Connect the runtime to models through a consistent interface.",
+      },
+      {
+        id: "L5",
+        title: "Guardrails & Policy",
+        desc: "Apply checks to inputs, actions, and outputs.",
+      },
+      {
+        id: "L6",
+        title: "Tools & Actions",
+        desc: "Execute tool requests and return structured results.",
+      },
+      {
+        id: "L7",
+        title: "Observability & Evaluation",
+        desc: "Trace runs and assess their behaviour and outcomes.",
+      },
+    ]);
+
+    expect(
+      conceptGroups.map((g) => ({
+        label: g.label,
+        range: g.rangeLabel,
+        ids: g.layerIds,
+      })),
+    ).toEqual([
+      { label: "Entry control", range: "L1", ids: ["L1"] },
+      {
+        label: "Agent execution",
+        range: "L2–L6",
+        ids: ["L2", "L3", "L4", "L5", "L6"],
+      },
+      { label: "Cross-cutting", range: "L7", ids: ["L7"] },
+    ]);
+  });
+
+  it("persists manual concept study statuses independently from recall-verified mastery", () => {
+    const initial = createInitialConceptStudyState();
+    expect(countReviewedConcepts(initial)).toBe(0);
+
+    const mockStorage = new Map<string, string>();
+    const originalStorage = globalThis.localStorage;
+    Object.defineProperty(globalThis, "localStorage", {
+      value: {
+        getItem: (k: string) => mockStorage.get(k) ?? null,
+        setItem: (k: string, v: string) => mockStorage.set(k, v),
+      },
+      configurable: true,
+    });
+
+    try {
+      mockStorage.set(
+        CONCEPT_STUDY_STORAGE_KEY,
+        JSON.stringify({
+          L1: "Reviewed",
+          L2: "Learning",
+          L3: "Reviewed",
+          L4: "InvalidStatusIgnored",
+        }),
+      );
+      const loaded = loadConceptStudyState();
+      expect(loaded.L1).toBe("Reviewed");
+      expect(loaded.L2).toBe("Learning");
+      expect(loaded.L3).toBe("Reviewed");
+      expect(loaded.L4).toBe("Not started");
+      expect(countReviewedConcepts(loaded)).toBe(2);
+
+      // Verify marking concepts "Reviewed" does NOT unlock recall-verified mastery
+      const mastery = loadLayerMastery();
+      expect(mastery.L1.lockedIn).toBe(false);
+      expect(mastery.L3.lockedIn).toBe(false);
     } finally {
       Object.defineProperty(globalThis, "localStorage", {
         value: originalStorage,

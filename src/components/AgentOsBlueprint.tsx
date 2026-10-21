@@ -110,10 +110,22 @@ export function evaluateRecallAttempt(
   );
 }
 
-export default function AgentOsBlueprint() {
+export default function AgentOsBlueprint({
+  initialLayerId,
+}: {
+  initialLayerId?: LayerId;
+} = {}) {
   const [lens, setLens] = useState<LensMode>("runtime");
-  const [selectedLayerId, setSelectedLayerId] = useState<LayerId>("L2");
+  const [selectedLayerId, setSelectedLayerId] = useState<LayerId>(
+    initialLayerId ?? "L2",
+  );
   const [mastery, setMastery] = useState<LayerMasteryState>(loadLayerMastery);
+
+  useEffect(() => {
+    if (initialLayerId) {
+      setSelectedLayerId(initialLayerId);
+    }
+  }, [initialLayerId]);
 
   // Loop simulator state
   const [simActive, setSimActive] = useState(false);
@@ -274,6 +286,9 @@ export default function AgentOsBlueprint() {
             </div>
           </div>
           <nav className="ft-secondary-links" aria-label="Vault sections">
+            <a href="#overview" className="ft-pill-link">
+              ← Overview
+            </a>
             <a href="#blueprint" className="ft-pill-link active">
               7-Layer OS Blueprint
             </a>
