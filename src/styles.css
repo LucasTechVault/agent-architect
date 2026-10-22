@@ -599,26 +599,59 @@ select {
   padding: 6px 8px;
   min-height: 29px;
 }
-.archetype-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+.knowledge-cluster {
+  position: relative;
+  margin-bottom: 30px;
 }
-.archetype-card {
-  padding: 15px 16px 11px;
-  border: 1px solid #dce2eb;
+.knowledge-cluster::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 24px;
+  bottom: -30px;
+  width: 2px;
+  background: #dce2eb;
+}
+.knowledge-cluster:last-child::before {
+  display: none;
+}
+.cluster-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--text-base);
+  font-weight: 650;
+  color: #405573;
+  margin-bottom: 16px;
+}
+.cluster-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #8ca5c8;
+  z-index: 2;
+  position: relative;
+}
+.cluster-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-left: 36px;
+}
+.knowledge-node {
+  flex: 1 1 300px;
+  border-radius: 8px;
+  border: 1px solid var(--role-color, #7285a6);
   background: white;
-  border-radius: 4px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.archetype-card:hover {
-  border-color: #a3b4d3;
-  box-shadow: 0 2px 7px #203a6610;
+.knowledge-node:hover {
+  box-shadow: 0 4px 12px #203a6615;
   color: inherit;
 }
 .card-heading {
@@ -669,7 +702,7 @@ select {
 .card-heading .status {
   margin-left: auto;
 }
-.archetype-card h2 {
+.knowledge-node h2 {
   font-size: var(--text-xl);
   display: flex;
   align-items: center;
@@ -677,10 +710,10 @@ select {
   gap: 8px;
   color: #3c4d66;
 }
-.archetype-card h2 > svg {
+.knowledge-node h2 > svg {
   color: #94a0b5;
 }
-.archetype-card > p {
+.knowledge-node > p {
   font-size: var(--text-base);
   line-height: 1.65;
   margin: 5px 0 11px;
@@ -2142,10 +2175,7 @@ label {
   .topbar {
     padding: 0 30px;
   }
-  .archetype-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .archetype-card {
+  .knowledge-node {
     padding: 16px;
   }
   .map-layout {
@@ -2243,10 +2273,7 @@ label {
   }
 }
 @media (max-width: 1000px) {
-  .archetype-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .archetype-card > p {
+  .knowledge-node > p {
     min-height: 0;
   }
   .card-properties {
@@ -2504,13 +2531,13 @@ label {
   .filter-controls {
     width: 100%;
   }
-  .archetype-card {
+  .knowledge-node {
     padding: 13px;
   }
-  .archetype-card h2 {
+  .knowledge-node h2 {
     font-size: var(--text-xl);
   }
-  .archetype-card > p {
+  .knowledge-node > p {
     font-size: var(--text-base);
   }
   .registry-footnote {
@@ -2915,6 +2942,12 @@ label {
   .schema-preview pre code {
     font-size: var(--text-sm);
   }
+}
+@media (max-width: 760px) {
+  .knowledge-cluster::before { display: none; }
+  .cluster-nodes { padding-left: 0; }
+  .cluster-header { margin-bottom: 12px; }
+  .cluster-dot { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   *,

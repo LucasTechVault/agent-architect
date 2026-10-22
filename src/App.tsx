@@ -670,60 +670,76 @@ function Registry({ progress }: { progress: Progress }) {
           </select>
         </div>
       </div>
-      <div className="archetype-grid">
-        {visible.map((a) => {
-          const spec = engineeringSpecs[a.id];
+      <div className="knowledge-graph">
+        {[1, 2, 3, 4].map((stage) => {
+          const stageArchetypes = visible.filter((a) => a.stage === stage);
+          if (stageArchetypes.length === 0) return null;
           return (
-            <a
-              className={`archetype-card ${a.color}`}
-              href={`#agent/${a.id}`}
-              key={a.id}
-            >
-              <div className="card-heading">
-                <RoleIcon agent={a} />
-                <span className="identifier">
-                  AGENT.{String(archetypes.indexOf(a) + 1).padStart(2, "0")}
-                </span>
-                <StatusBadge status={statusOf(a, progress)} />
+            <div className="knowledge-cluster" key={stage}>
+              <div className="cluster-header">
+                <span className="cluster-dot" />
+                Phase 0{stage} /{" "}
+                {roadmapPhases.find((p) => p.id === stage)?.title}
               </div>
-              <h2>
-                {a.name}
-                <ArrowUpRight size={13} />
-              </h2>
-              <p>{a.purpose}</p>
-              <dl className="card-properties">
-                <div>
-                  <dt>RUNTIME</dt>
-                  <dd>
-                    <code>{a.runtime}</code>
-                  </dd>
-                </div>
-                <div>
-                  <dt>STATE</dt>
-                  <dd>{spec.stateMutability}</dd>
-                </div>
-                <div>
-                  <dt>GATE</dt>
-                  <dd>{spec.verificationGate}</dd>
-                </div>
-              </dl>
-              <div className="card-boundary">
-                <span className="field-label">AUTHORITY</span>
-                <p>{spec.blocks[0].decision}</p>
+              <div className="cluster-nodes">
+                {stageArchetypes.map((a) => {
+                  const spec = engineeringSpecs[a.id];
+                  return (
+                    <a
+                      className={`knowledge-node ${a.color}`}
+                      href={`#agent/${a.id}`}
+                      key={a.id}
+                    >
+                      <div className="card-heading">
+                        <RoleIcon agent={a} />
+                        <span className="identifier">
+                          AGENT.
+                          {String(archetypes.indexOf(a) + 1).padStart(2, "0")}
+                        </span>
+                        <StatusBadge status={statusOf(a, progress)} />
+                      </div>
+                      <h2>
+                        {a.name}
+                        <ArrowUpRight size={13} />
+                      </h2>
+                      <p>{a.purpose}</p>
+                      <dl className="card-properties">
+                        <div>
+                          <dt>RUNTIME</dt>
+                          <dd>
+                            <code>{a.runtime}</code>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>STATE</dt>
+                          <dd>{spec.stateMutability}</dd>
+                        </div>
+                        <div>
+                          <dt>GATE</dt>
+                          <dd>{spec.verificationGate}</dd>
+                        </div>
+                      </dl>
+                      <div className="card-boundary">
+                        <span className="field-label">AUTHORITY</span>
+                        <p>{spec.blocks[0].decision}</p>
+                      </div>
+                      <div className="tool-chips">
+                        {a.allowedTools.slice(0, 3).map((tool) => (
+                          <code key={tool}>{tool}</code>
+                        ))}
+                      </div>
+                      <div className="card-footer">
+                        <code>{spec.modulePath}</code>
+                        <span>
+                          {completion(a, progress)}/{a.milestones.length} milestones
+                          · {spec.implementation}
+                        </span>
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
-              <div className="tool-chips">
-                {a.allowedTools.slice(0, 3).map((tool) => (
-                  <code key={tool}>{tool}</code>
-                ))}
-              </div>
-              <div className="card-footer">
-                <code>{spec.modulePath}</code>
-                <span>
-                  {completion(a, progress)}/{a.milestones.length} milestones ·{" "}
-                  {spec.implementation}
-                </span>
-              </div>
-            </a>
+            </div>
           );
         })}
       </div>
